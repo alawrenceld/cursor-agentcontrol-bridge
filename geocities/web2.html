@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberDreamer99 :: My Web 2.0 Space</title>
+  <style>
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.55; }
+    }
+    @keyframes loading-dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      font-family: Tahoma, Verdana, "Segoe UI", Arial, sans-serif;
+      font-size: 12px;
+      color: #333;
+      background: #1a1a2e url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='1' fill='%23ffffff' opacity='0.15'/%3E%3C/svg%3E") repeat;
+    }
+
+    a { color: #0066cc; text-decoration: none; }
+    a:hover { color: #ff6600; text-decoration: underline; }
+    a:visited { color: #663399; }
+
+    .page-wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 12px;
+    }
+
+    /* Glossy Web 2.0 header */
+    .header {
+      background: linear-gradient(180deg, #4a90d9 0%, #2b6cb0 45%, #1e4d8c 55%, #3a7bc8 100%);
+      border-radius: 12px 12px 0 0;
+      border: 1px solid #1a3a6e;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.35);
+      padding: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .header-top {
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+      padding: 6px 16px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.85);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(0,0,0,0.2);
+    }
+
+    .beta-badge {
+      background: linear-gradient(180deg, #ffcc00, #ff9900);
+      color: #000;
+      font-weight: bold;
+      font-size: 9px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid #cc7700;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .header-body {
+      padding: 20px 24px 16px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-end;
+    }
+
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 8px;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.2);
+      background: linear-gradient(135deg, #ff6699, #9966ff, #66ccff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      flex-shrink: 0;
+    }
+
+    .profile-info h1 {
+      margin: 0 0 4px;
+      font-size: 28px;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      font-family: "Trebuchet MS", Tahoma, sans-serif;
+      letter-spacing: -0.5px;
+    }
+
+    .profile-info .tagline {
+      color: #cce5ff;
+      font-size: 13px;
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+
+    .profile-info .meta {
+      color: rgba(255,255,255,0.75);
+      font-size: 11px;
+    }
+
+    .online-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #33ff33;
+      border-radius: 50%;
+      box-shadow: 0 0 6px #33ff33;
+      animation: pulse 2s ease-in-out infinite;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+
+    /* Glossy nav tabs */
+    .nav-tabs {
+      display: flex;
+      background: linear-gradient(180deg, #e8e8e8, #c8c8c8);
+      border: 1px solid #999;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      padding: 0 8px 0;
+      box-shadow: inset 0 1px 0 #fff;
+    }
+
+    .nav-tabs a {
+      display: block;
+      padding: 8px 16px;
+      margin: 4px 2px 0;
+      background: linear-gradient(180deg, #f5f5f5, #ddd);
+      border: 1px solid #aaa;
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      color: #333;
+      font-weight: bold;
+      font-size: 11px;
+      box-shadow: inset 0 1px 0 #fff;
+    }
+
+    .nav-tabs a:hover {
+      background: linear-gradient(180deg, #fff, #eee);
+      color: #0066cc;
+      text-decoration: none;
+    }
+
+    .nav-tabs a.active {
+      background: linear-gradient(180deg, #fff, #f0f0f0);
+      border-color: #999;
+      color: #0066cc;
+      margin-bottom: -1px;
+      padding-bottom: 9px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Ticker */
+    .ticker-wrap {
+      background: #000;
+      border: 1px solid #333;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 10px 0;
+      padding: 4px 0;
+    }
+
+    .ticker-inner {
+      display: flex;
+      white-space: nowrap;
+      animation: ticker 30s linear infinite;
+    }
+
+    .ticker-inner span {
+      color: #00ff00;
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      padding-right: 60px;
+    }
+
+    /* Main layout */
+    .layout {
+      display: table;
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 10px 0;
+      margin-top: 10px;
+    }
+
+    .sidebar, .main {
+      display: table-cell;
+      vertical-align: top;
+    }
+
+    .sidebar { width: 220px; }
+
+    .panel {
+      background: linear-gradient(180deg, #fff 0%, #f0f0f0 100%);
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15), inset 0 1px 0 #fff;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      background: linear-gradient(180deg, #6ba3e0, #4a85c4);
+      color: #fff;
+      font-weight: bold;
+      font-size: 11px;
+      padding: 6px 10px;
+      text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+      border-bottom: 1px solid #3a6a9e;
+    }
+
+    .panel-body {
+      padding: 10px;
+    }
+
+    /* Glossy buttons */
+    .glossy-btn {
+      display: inline-block;
+      background: linear-gradient(180deg, #7ec8ff 0%, #3d94d9 50%, #2b7bc2 51%, #5aadf0 100%);
+      color: #fff !important;
+      font-weight: bold;
+      font-size: 11px;
+      padding: 6px 14px;
+      border-radius: 16px;
+      border: 1px solid #1a5a9e;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.4);
+      cursor: pointer;
+      text-decoration: none !important;
+      text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+      margin: 2px;
+    }
+
+    .glossy-btn:hover {
+      background: linear-gradient(180deg, #9ed8ff 0%, #5aa8e9 50%, #3d8ed2 51%, #7bc0f8 100%);
+      color: #fff !important;
+    }
+
+    .glossy-btn.orange {
+      background: linear-gradient(180deg, #ffcc66 0%, #ff9933 50%, #e88020 51%, #ffaa44 100%);
+      border-color: #cc6600;
+    }
+
+    .glossy-btn.pink {
+      background: linear-gradient(180deg, #ff99cc 0%, #ff6699 50%, #e04477 51%, #ff88bb 100%);
+      border-color: #cc3366;
+    }
+
+    /* Top 8 friends grid */
+    .top8 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .friend {
+      text-align: center;
+      font-size: 9px;
+    }
+
+    .friend-pic {
+      width: 44px;
+      height: 44px;
+      border-radius: 4px;
+      border: 2px solid #ccc;
+      margin: 0 auto 3px;
+      background: linear-gradient(135deg, #ccc, #999);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    /* Blog post */
+    .blog-post {
+      border-bottom: 1px dashed #ccc;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+
+    .blog-post:last-child { border-bottom: none; margin-bottom: 0; }
+
+    .blog-post h3 {
+      margin: 0 0 4px;
+      font-size: 14px;
+      color: #0066cc;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    .blog-post .date {
+      color: #999;
+      font-size: 10px;
+      margin-bottom: 6px;
+    }
+
+    .blog-post p {
+      line-height: 1.5;
+      margin: 0 0 6px;
+    }
+
+    .mood {
+      background: #ffffcc;
+      border: 1px solid #e8e8a0;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+      display: inline-block;
+    }
+
+    /* Music player mock */
+    .music-player {
+      background: #1a1a1a;
+      border-radius: 6px;
+      padding: 8px;
+      color: #ccc;
+      font-size: 10px;
+    }
+
+    .music-player .track {
+      color: #66ccff;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #333;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 6px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 37%;
+      background: linear-gradient(90deg, #ff6600, #ffcc00);
+      border-radius: 4px;
+    }
+
+    /* Poll */
+    .poll-option {
+      margin: 4px 0;
+      font-size: 11px;
+    }
+
+    .poll-bar {
+      height: 14px;
+      background: #e0e0e0;
+      border-radius: 7px;
+      overflow: hidden;
+      margin-top: 2px;
+    }
+
+    .poll-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6699ff, #3366cc);
+      border-radius: 7px;
+      font-size: 9px;
+      color: #fff;
+      line-height: 14px;
+      padding-left: 6px;
+    }
+
+    /* Comments */
+    .comment {
+      background: #f8f8f8;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 8px;
+      margin-bottom: 6px;
+      font-size: 11px;
+    }
+
+    .comment .author {
+      font-weight: bold;
+      color: #0066cc;
+    }
+
+    .comment .time {
+      color: #999;
+      font-size: 10px;
+    }
+
+    /* Shimmer title */
+    .shimmer {
+      background: linear-gradient(90deg, #ff6600, #ffcc00, #ff6600, #ffcc00);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s linear infinite;
+      font-weight: bold;
+    }
+
+    /* Badges row */
+    .badges {
+      text-align: center;
+      margin: 16px 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: linear-gradient(180deg, #f0f0f0, #d0d0d0);
+      border: 1px solid #999;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 9px;
+      color: #333;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      line-height: 1.3;
+    }
+
+    .badge.firefox {
+      background: linear-gradient(180deg, #ff9933, #e86500);
+      color: #fff;
+      border-color: #cc5500;
+    }
+
+    .counter-box {
+      background: #000;
+      color: #00ff00;
+      font-family: "Courier New", monospace;
+      font-size: 14px;
+      padding: 4px 8px;
+      border: 2px inset #333;
+      border-radius: 2px;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 10px;
+      color: #888;
+      margin-top: 16px;
+      padding: 12px;
+      border-top: 1px solid #444;
+    }
+
+    .flash-placeholder {
+      background: #000;
+      border: 2px solid #666;
+      border-radius: 4px;
+      padding: 20px;
+      text-align: center;
+      color: #ffcc00;
+      font-size: 11px;
+    }
+
+    .flash-placeholder .spin-icon {
+      display: inline-block;
+      animation: spin-slow 2s linear infinite;
+      font-size: 24px;
+    }
+
+    .msn-nudge {
+      background: linear-gradient(180deg, #e8f4ff, #c8e0ff);
+      border: 1px solid #99bbdd;
+      border-radius: 6px;
+      padding: 8px;
+      text-align: center;
+      font-size: 11px;
+      margin-top: 8px;
+    }
+
+    .divider {
+      text-align: center;
+      color: #aaa;
+      margin: 10px 0;
+      font-size: 10px;
+    }
+
+    .tag-cloud a {
+      display: inline-block;
+      margin: 2px;
+      padding: 2px 6px;
+      background: #e8f0ff;
+      border: 1px solid #c0d0ee;
+      border-radius: 10px;
+      font-size: 10px;
+    }
+
+    .loading::after {
+      content: '...';
+      animation: loading-dots 1.5s steps(1) infinite;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <div class="header">
+    <div class="header-top">
+      <span>🌐 CyberDreamer99.geocities.com/web2/</span>
+      <span>
+        <span class="beta-badge">Beta</span>
+        &nbsp; Powered by Web 2.0™
+      </span>
+    </div>
+    <div class="header-body">
+      <div class="avatar">[PROFILE<br>PHOTO]</div>
+      <div class="profile-info">
+        <h1>CyberDreamer99</h1>
+        <div class="tagline">"living in a web 2.0 world ~~ xoxo"</div>
+        <div class="meta">
+          <span class="online-dot"></span> Online Now &nbsp;|&nbsp;
+          Last Login: Today @ 2:47 PM &nbsp;|&nbsp;
+          Profile Views: <span id="profile-views">12,847</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <a href="#" class="active">Home</a>
+    <a href="#blog">Blog</a>
+    <a href="#pics">Pics</a>
+    <a href="#friends">Friends</a>
+    <a href="#music">Music</a>
+    <a href="index.html">← My 90s Site</a>
+    <a href="2010s.html">2010s Feed →</a>
+    <a href="2010s-vlog.html">Vlog Channel →</a>
+    <a href="2020s.html">Site Today →</a>
+    <a href="2030s.html">Agent Era 🤖</a>
+    <a href="secret.html">Secret 🔒</a>
+  </div>
+
+  <div class="ticker-wrap">
+    <div class="ticker-inner">
+      <span>★ NOW FEATURING: AJAX, RSS FEEDS, AND GLOSSY BUTTONS ★ YOU ARE VISITOR #<span id="counter-ticker">000847</span> ★ BEST VIEWED IN FIREFOX 2.0 @ 1024x768 ★ ADD ME ON MYSPACE ★ SUBSCRIBE TO MY RSS FEED ★</span>
+      <span>★ NOW FEATURING: AJAX, RSS FEEDS, AND GLOSSY BUTTONS ★ YOU ARE VISITOR #<span id="counter-ticker2">000847</span> ★ BEST VIEWED IN FIREFOX 2.0 @ 1024x768 ★ ADD ME ON MYSPACE ★ SUBSCRIBE TO MY RSS FEED ★</span>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar">
+
+      <div class="panel">
+        <div class="panel-header">👤 About Me</div>
+        <div class="panel-body">
+          <p style="margin:0 0 8px; line-height:1.5;">
+            hey!! im cyberdreamer99, upgraded from my old geocities page lol.
+            now im all about <b>blogs, social networking, and streaming music</b> ~~
+          </p>
+          <div class="mood">
+            😊 Mood: <b>hyper</b><br>
+            🎵 Listening: <i>My Chemical Romance</i><br>
+            📺 Watching: <i>Lost season 2</i>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">📊 Site Stats</div>
+        <div class="panel-body" style="text-align:center;">
+          <div style="font-size:10px; color:#666; margin-bottom:4px;">Visitors Since 2004:</div>
+          <div class="counter-box" id="counter">000,847</div>
+          <div style="margin-top:8px; font-size:10px; color:#999;">
+            Powered by <a href="#">StatCounter</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">🎵 Now Playing</div>
+        <div class="panel-body">
+          <div class="music-player">
+            <div class="track">♫ Welcome to the Black Parade</div>
+            <div class="progress-bar"><div class="progress-fill"></div></div>
+            <div style="display:flex; justify-content:space-between;">
+              <span>1:23</span><span>4:07</span>
+            </div>
+            <div style="margin-top:6px;">
+              <button class="glossy-btn" style="font-size:10px; padding:3px 10px; border:none; cursor:pointer;" onclick="alert('Buffering...')">▶</button>
+              <button class="glossy-btn orange" style="font-size:10px; padding:3px 10px; border:none; cursor:pointer;" onclick="alert('Skipped!')">⏭</button>
+            </div>
+          </div>
+          <div style="font-size:9px; color:#999; margin-top:6px; text-align:center;">
+            Autoplay courtesy of MySpace Music Player
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">💬 MSN Messenger</div>
+        <div class="panel-body">
+          <div style="font-size:11px;">
+            <span class="online-dot"></span> <b>xX_DarkAngel_Xx</b><br>
+            <span class="online-dot"></span> <b>sk8er_boi_2005</b><br>
+            <span style="color:#999;">○ emo_kid_4eva (away)</span><br>
+            <span style="color:#999;">○ glitter_gurl (offline)</span>
+          </div>
+          <div class="msn-nudge">
+            <button class="glossy-btn pink" style="border:none; cursor:pointer; font-size:10px;" onclick="alert('You have nudged xX_DarkAngel_Xx! They may block you.')">
+              👋 NUDGE!!!
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">🏷️ Tags</div>
+        <div class="panel-body tag-cloud">
+          <a href="#">emo</a>
+          <a href="#">myspace</a>
+          <a href="#">web2.0</a>
+          <a href="#">blogging</a>
+          <a href="#">ipod</a>
+          <a href="#">firefox</a>
+          <a href="#">limewire</a>
+          <a href="#">xanga</a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="main">
+
+      <div class="panel">
+        <div class="panel-header">⭐ My Top 8 Friends <span style="font-weight:normal; font-size:10px;">(drag to reorder)</span></div>
+        <div class="panel-body">
+          <div class="top8">
+            <div class="friend"><div class="friend-pic">🖤</div>xX_DarkAngel</div>
+            <div class="friend"><div class="friend-pic">🛹</div>sk8er_boi</div>
+            <div class="friend"><div class="friend-pic">✨</div>glitter_gurl</div>
+            <div class="friend"><div class="friend-pic">🎸</div>emo_kid_4eva</div>
+            <div class="friend"><div class="friend-pic">📷</div>flickr_fan</div>
+            <div class="friend"><div class="friend-pic">🐱</div>mittens_cat</div>
+            <div class="friend"><div class="friend-pic">💿</div>napster_guy</div>
+            <div class="friend"><div class="friend-pic">🤖</div>AIM_bot</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="blog">
+        <div class="panel-header">📝 Blog <span class="shimmer">NEW POSTS!!!</span></div>
+        <div class="panel-body">
+
+          <div class="blog-post">
+            <h3>omg my new layout is SO much better</h3>
+            <div class="date">Posted: March 15, 2006 @ 11:34 PM &nbsp;|&nbsp; 14 comments</div>
+            <p>
+              ok so i FINALLY upgraded from my old geocities page (the one with all the
+              blinking text lol) to this sick new web 2.0 layout. it has <b>rounded corners</b>
+              and <b>gradient buttons</b> and everything!!
+            </p>
+            <p>
+              my friend told me about this thing called "CSS" and now my site loads
+              in like 3 seconds instead of 45. progress 😎
+            </p>
+            <p style="font-size:10px; color:#999;">
+              <a href="#">💬 Comment</a> &nbsp;|&nbsp;
+              <a href="#">🔗 Permalink</a> &nbsp;|&nbsp;
+              <a href="#">📡 RSS</a>
+            </p>
+          </div>
+
+          <div class="blog-post">
+            <h3>just got an ipod nano!!!</h3>
+            <div class="date">Posted: February 28, 2006 @ 4:12 PM &nbsp;|&nbsp; 23 comments</div>
+            <p>
+              ITS SO SMALL AND WHITE AND SHINY. ive already put 2,000 songs on it
+              (thanks limewire lol dont tell anyone). the click wheel is addictive.
+            </p>
+            <p>
+              currently listening to: fall out boy, panic at the disco, and
+              taking back sunday on repeat 🎧
+            </p>
+          </div>
+
+          <div class="blog-post">
+            <h3>firefox &gt; internet explorer</h3>
+            <div class="date">Posted: January 8, 2006 @ 9:01 PM &nbsp;|&nbsp; 31 comments</div>
+            <p>
+              fight me. tabbed browsing changed my LIFE. also i installed like
+              47 extensions and now my browser takes 30 seconds to start but
+              its worth it for the weather fox.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">📊 Poll: What's the best thing about 2006?</div>
+        <div class="panel-body">
+          <div class="poll-option">
+            YouTube <div class="poll-bar"><div class="poll-fill" style="width:42%;">42%</div></div>
+          </div>
+          <div class="poll-option">
+            MySpace <div class="poll-bar"><div class="poll-fill" style="width:28%;">28%</div></div>
+          </div>
+          <div class="poll-option">
+            Wikipedia <div class="poll-bar"><div class="poll-fill" style="width:18%;">18%</div></div>
+          </div>
+          <div class="poll-option">
+            Twitter (just launched!) <div class="poll-bar"><div class="poll-fill" style="width:12%;">12%</div></div>
+          </div>
+          <p style="font-size:10px; color:#999; margin:8px 0 0;">847 votes · <a href="#">Vote now!</a></p>
+        </div>
+      </div>
+
+      <div class="panel" id="pics">
+        <div class="panel-header">📷 Photo Album <span style="font-weight:normal;">(hosted on Flickr)</span></div>
+        <div class="panel-body">
+          <table width="100%" cellpadding="4" cellspacing="0">
+            <tr>
+              <td width="33%" align="center">
+                <div style="width:100%; height:80px; background:linear-gradient(135deg,#ff6699,#9966ff); border-radius:6px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; color:#fff; font-size:10px;">
+                  [concert pic]
+                </div>
+                <div style="font-size:10px; margin-top:4px;">mcr concert!!!</div>
+              </td>
+              <td width="33%" align="center">
+                <div style="width:100%; height:80px; background:linear-gradient(135deg,#66ccff,#3366cc); border-radius:6px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; color:#fff; font-size:10px;">
+                  [ipod pic]
+                </div>
+                <div style="font-size:10px; margin-top:4px;">my ipod nano</div>
+              </td>
+              <td width="33%" align="center">
+                <div style="width:100%; height:80px; background:linear-gradient(135deg,#ffcc00,#ff6600); border-radius:6px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; color:#fff; font-size:10px;">
+                  [cat pic]
+                </div>
+                <div style="font-size:10px; margin-top:4px;">mittens still rules</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">💬 Comments <span style="font-weight:normal;">(4 new!)</span></div>
+        <div class="panel-body">
+          <div class="comment">
+            <span class="author">xX_DarkAngel_Xx</span>
+            <span class="time"> — 2 hours ago</span>
+            <p style="margin:4px 0 0;">omg ur new layout is SO much better than ur old page lol 💕</p>
+          </div>
+          <div class="comment">
+            <span class="author">sk8er_boi_2005</span>
+            <span class="time"> — 5 hours ago</span>
+            <p style="margin:4px 0 0;">dude how do u get those glossy buttons?? teach me</p>
+          </div>
+          <div class="comment">
+            <span class="author">RandomDiggUser</span>
+            <span class="time"> — yesterday</span>
+            <p style="margin:4px 0 0;">this should be on the digg front page</p>
+          </div>
+          <form onsubmit="alert('Comment posted! (not really)'); return false;" style="margin-top:10px;">
+            <textarea rows="2" style="width:100%; border:1px solid #ccc; border-radius:4px; padding:6px; font-family:Tahoma,sans-serif; font-size:11px;" placeholder="Write a comment..."></textarea>
+            <div style="margin-top:6px;">
+              <button type="submit" class="glossy-btn" style="border:none; cursor:pointer;">Post Comment</button>
+              <a href="#" class="glossy-btn orange" style="font-size:10px;">Add as Friend</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">⚡ Flash Intro <span style="font-weight:normal;">(skip if u have dial-up)</span></div>
+        <div class="panel-body">
+          <div class="flash-placeholder">
+            <div class="spin-icon">⏳</div>
+            <div class="loading" style="margin-top:8px;">Loading Flash Player</div>
+            <div style="margin-top:8px; font-size:10px; color:#888;">
+              [Adobe Flash Player 9 required — <a href="#" style="color:#66ccff;">Download here</a>]
+            </div>
+            <button class="glossy-btn" style="margin-top:10px; border:none; cursor:pointer; font-size:10px;" onclick="alert('Flash plugin not found. Please install Macromedia Flash Player 9.')">
+              ▶ Skip Intro
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">🔗 Cool Links (Web 2.0 Edition)</div>
+        <div class="panel-body" style="font-size:11px; line-height:2;">
+          <a href="http://www.myspace.com">MySpace</a> — customize ur profile!!<br>
+          <a href="http://www.youtube.com">YouTube</a> — watch random videos 4 hours<br>
+          <a href="http://www.wikipedia.org">Wikipedia</a> — the free encyclopedia that anyone can edit<br>
+          <a href="http://www.digg.com">Digg</a> — vote on cool links<br>
+          <a href="http://www.flickr.com">Flickr</a> — share ur photos<br>
+          <a href="#">Limewire</a> — totally legal music downloads (shh)<br>
+          <a href="index.html">My Old 90s GeoCities Page</a> — nostalgia trip<br>
+          <a href="2010s.html">My 2010s Social Feed</a> — now with hashtags<br>
+          <a href="2010s-vlog.html">My Vlog Channel</a> — 847K subscribers and counting<br>
+          <a href="2030s.html">The Agent Era</a> — an AI swarm built this one, apparently<br>
+          <a href="awards.html">My Awards</a> · <a href="pets.html">Mittens</a> · <a href="midi.html">MIDI Zone</a>
+        </div>
+      </div>
+
+      <p style="text-align:center; margin:12px 0;">
+        <a class="glossy-btn" href="mailto:cyberdreamer99@hotmail.com?subject=add me on myspace!!">✉️ Email Me</a>
+        <a class="glossy-btn orange" href="#" onclick="alert('RSS feed: cyberdreamer99.xml'); return false;">📡 RSS Feed</a>
+        <a class="glossy-btn pink" href="#" onclick="alert('Added to MySpace Top 8!'); return false;">⭐ Add to Top 8</a>
+      </p>
+
+    </div>
+  </div>
+
+  <div class="badges">
+    <span class="badge firefox">🦊 Get Firefox<br>2.0</span>
+    <span class="badge">Valid<br>XHTML 1.0</span>
+    <span class="badge">CSS 2.1<br>Compliant</span>
+    <span class="badge" style="background:linear-gradient(180deg,#ffcc00,#ff9900);">Web 2.0<br>Certified™</span>
+    <span class="badge">RSS 2.0<br>Feed</span>
+    <span class="badge" style="background:linear-gradient(180deg,#ff6699,#cc3366); color:#fff;">MySpace<br>Compatible</span>
+    <span class="badge">1024×768<br>Optimized</span>
+    <span class="badge" style="background:linear-gradient(180deg,#66ccff,#3399cc); color:#fff;">GeoCities<br>Still Here!</span>
+  </div>
+
+  <footer>
+    <p>
+      © 2004–2006 CyberDreamer99. Some rights reserved (Creative Commons).<br>
+      Hosted on <b style="color:#ff6600;">GeoCities</b> — Neighborhood: <i>Area51/DimensionX/Web2</i><br>
+      Built with Notepad++, validated with the W3C validator, powered by AJAX (eventually).<br>
+      <span style="color:#666;">This site is best experienced with broadband. Dial-up users: we're sorry.</span>
+    </p>
+    <p style="color:#ff6600; font-size:12px; margin-top:8px;">
+      thx 4 visiting!! comment on my page plz ~~ xoxo
+    </p>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var n = 847 + Math.floor(Math.random() * 500);
+    function fmt(num) {
+      var s = String(num).padStart(6, '0');
+      return s.slice(0, 3) + ',' + s.slice(3);
+    }
+    document.getElementById('counter').textContent = fmt(n);
+    document.getElementById('counter-ticker').textContent = String(n).padStart(6, '0');
+    document.getElementById('counter-ticker2').textContent = String(n).padStart(6, '0');
+
+    var pv = 12847 + Math.floor(Math.random() * 1000);
+    document.getElementById('profile-views').textContent = pv.toLocaleString();
+
+    setInterval(function () {
+      n++;
+      document.getElementById('counter').textContent = fmt(n);
+    }, 12000);
+  })();
+</script>
+
+</body>
+</html>

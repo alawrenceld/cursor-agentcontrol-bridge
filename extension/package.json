@@ -1,0 +1,89 @@
+{
+  "name": "cursor-agentcontrol-metrics",
+  "displayName": "AgentControl Metrics",
+  "description": "LaunchDarkly AI Config Monitoring metrics for Cursor agent usage, inside the IDE",
+  "version": "0.3.3",
+  "publisher": "ttotenberg",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "main": "./extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ldAgentControl",
+          "title": "AgentControl",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "ldAgentControl": [
+        {
+          "type": "webview",
+          "id": "ldAgentControl.metrics",
+          "name": "Cursor Usage · LaunchDarkly"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "ldAgentControl.refresh",
+        "title": "AgentControl: Refresh Metrics"
+      },
+      {
+        "command": "ldAgentControl.setToken",
+        "title": "AgentControl: Set LaunchDarkly API Token (read metrics)"
+      },
+      {
+        "command": "ldAgentControl.setSdkKey",
+        "title": "AgentControl: Set LaunchDarkly SDK Key (record agent runs)"
+      },
+      {
+        "command": "ldAgentControl.openHookConfig",
+        "title": "AgentControl: Open Hook Config (ld-agentcontrol.json)"
+      }
+    ],
+    "configuration": {
+      "title": "AgentControl Metrics",
+      "properties": {
+        "ldAgentControl.projectKey": {
+          "type": "string",
+          "default": "cursor-monitoring",
+          "description": "LaunchDarkly project key"
+        },
+        "ldAgentControl.configKey": {
+          "type": "string",
+          "default": "cursor-agent-usage",
+          "description": "AI Config key whose Monitoring metrics to display"
+        },
+        "ldAgentControl.environmentKey": {
+          "type": "string",
+          "default": "production",
+          "description": "LaunchDarkly environment key"
+        },
+        "ldAgentControl.pollSeconds": {
+          "type": "number",
+          "default": 60,
+          "minimum": 15,
+          "description": "How often to refresh metrics from LaunchDarkly"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "package": "vsce package --allow-missing-repository"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.0.0"
+  }
+}

@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberDreamer99 :: 2010s Social Feed</title>
+  <style>
+    @keyframes gradient-slide {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes pop {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
+    @keyframes typing {
+      0%, 20% { content: ""; }
+      40% { content: "."; }
+      60% { content: ".."; }
+      80%, 100% { content: "..."; }
+    }
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: #273444;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.35), transparent 28%),
+        linear-gradient(135deg, #6dd5ed, #cc2bff, #fcb045);
+      background-size: 200% 200%;
+      animation: gradient-slide 16s ease infinite;
+    }
+
+    a { color: #1da1f2; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(255,255,255,0.88);
+      border-bottom: 1px solid rgba(255,255,255,0.65);
+      box-shadow: 0 2px 18px rgba(31,45,61,0.18);
+      backdrop-filter: blur(12px);
+    }
+
+    .topbar-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #111;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .app-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #ff0050, #8338ec, #3a86ff);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 6px 16px rgba(131,56,236,0.35);
+      animation: pop 2.8s ease-in-out infinite;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .nav a { color: #4a5568; }
+    .nav a.active {
+      color: #fff;
+      background: #111;
+      border-radius: 999px;
+      padding: 6px 12px;
+      text-decoration: none;
+    }
+
+    .page {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 24px 18px 42px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+
+    .hero-card, .phone, .card, .sidebar-card {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 22px;
+      box-shadow: 0 18px 45px rgba(31,45,61,0.22);
+    }
+
+    .hero-card {
+      padding: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-card::after {
+      content: "#nofilter";
+      position: absolute;
+      right: -16px;
+      bottom: 18px;
+      font-size: 58px;
+      font-weight: 900;
+      color: rgba(131,56,236,0.08);
+      transform: rotate(-8deg);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #edf2ff;
+      color: #5f3dc4;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(38px, 8vw, 74px);
+      line-height: 0.92;
+      letter-spacing: -4px;
+      color: #111;
+    }
+
+    .hero-card p {
+      max-width: 560px;
+      margin: 18px 0;
+      font-size: 17px;
+      line-height: 1.6;
+      color: #4a5568;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 16px;
+      color: #fff;
+      background: #111;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(17,17,17,0.22);
+    }
+
+    .btn.alt {
+      color: #111;
+      background: #fff;
+      border: 1px solid #dfe6ee;
+      box-shadow: 0 8px 18px rgba(31,45,61,0.12);
+    }
+
+    .phone {
+      padding: 14px;
+      background: #111;
+      border-radius: 36px;
+      color: #fff;
+      transform: rotate(2deg);
+      animation: floaty 5s ease-in-out infinite;
+    }
+
+    .phone-screen {
+      min-height: 390px;
+      border-radius: 26px;
+      overflow: hidden;
+      background: #f7f8fb;
+      color: #273444;
+    }
+
+    .phone-header {
+      padding: 14px;
+      background: linear-gradient(135deg, #ff0050, #8338ec);
+      color: #fff;
+      font-weight: 800;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .story-row {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      overflow: hidden;
+      border-bottom: 1px solid #edf0f5;
+      background: #fff;
+    }
+
+    .story {
+      text-align: center;
+      font-size: 10px;
+      width: 54px;
+      flex: 0 0 auto;
+    }
+
+    .story-pic {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      margin: 0 auto 4px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 20px;
+      background: linear-gradient(135deg, #fcb045, #fd1d1d, #833ab4);
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 2px #fd1d1d;
+    }
+
+    .mini-post {
+      padding: 12px;
+      background: #fff;
+    }
+
+    .mini-photo {
+      height: 170px;
+      border-radius: 14px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.2), transparent),
+        linear-gradient(135deg, #3a86ff, #8338ec 48%, #ffbe0b);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 42px;
+      margin: 10px 0;
+    }
+
+    .mini-actions {
+      display: flex;
+      gap: 12px;
+      font-size: 20px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr 260px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .sidebar-card, .card {
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+
+    .sidebar-card {
+      padding: 18px;
+    }
+
+    .sidebar-card h3, .card h2 {
+      margin: 0 0 12px;
+      color: #111;
+      letter-spacing: -0.3px;
+    }
+
+    .profile {
+      text-align: center;
+    }
+
+    .avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 10px;
+      color: #fff;
+      font-size: 34px;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      box-shadow: 0 0 0 6px #fff, 0 12px 28px rgba(0,114,255,0.3);
+    }
+
+    .handle {
+      color: #718096;
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding-top: 14px;
+      border-top: 1px solid #edf0f5;
+      font-size: 12px;
+    }
+
+    .stats b {
+      display: block;
+      color: #111;
+      font-size: 18px;
+    }
+
+    .trend {
+      display: block;
+      padding: 9px 0;
+      border-bottom: 1px solid #edf0f5;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .trend:last-child { border-bottom: none; }
+    .trend small {
+      display: block;
+      color: #718096;
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    .playlist {
+      background: #111;
+      color: #fff;
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .progress {
+      height: 6px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .progress span {
+      display: block;
+      width: 64%;
+      height: 100%;
+      background: linear-gradient(90deg, #1db954, #9cffac);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 18px 0;
+    }
+
+    .card-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(135deg, #8338ec, #ff006e);
+      flex: 0 0 auto;
+    }
+
+    .card-meta {
+      color: #718096;
+      font-size: 12px;
+    }
+
+    .card-body {
+      padding: 14px 18px 18px;
+      line-height: 1.55;
+    }
+
+    .post-photo {
+      min-height: 260px;
+      margin: 12px 0;
+      border-radius: 18px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.18), transparent),
+        linear-gradient(135deg, #ffbe0b, #fb5607, #ff006e, #8338ec);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      text-align: center;
+      font-size: 38px;
+      font-weight: 900;
+      text-shadow: 0 3px 16px rgba(0,0,0,0.3);
+    }
+
+    .tweet {
+      background: #f8fbff;
+      border: 1px solid #dbeafe;
+      border-radius: 18px;
+      padding: 16px;
+      font-size: 18px;
+      color: #1f2d3d;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding-top: 10px;
+      color: #718096;
+      font-size: 13px;
+      font-weight: 700;
+      border-top: 1px solid #edf0f5;
+    }
+
+    .actions button {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      padding: 0;
+    }
+
+    .actions button:hover { color: #ff006e; }
+
+    .notes {
+      background: #fbf4ff;
+      border: 1px solid #ead7ff;
+      border-radius: 16px;
+      padding: 12px;
+      font-size: 13px;
+    }
+
+    .typing::after {
+      content: "...";
+      animation: typing 1.4s steps(1) infinite;
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .app {
+      aspect-ratio: 1;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 24px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 8px 18px rgba(31,45,61,0.14);
+    }
+
+    footer {
+      margin-top: 26px;
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      font-size: 12px;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 18px;
+    }
+
+    .badge {
+      background: rgba(255,255,255,0.85);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: #4a5568;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 900px) {
+      .hero, .layout {
+        grid-template-columns: 1fr;
+      }
+      .phone {
+        max-width: 360px;
+        margin: 0 auto;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .topbar-inner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .hero-card {
+        padding: 24px;
+      }
+      h1 {
+        letter-spacing: -2px;
+      }
+      .post-photo {
+        min-height: 190px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="2010s.html">
+      <span class="app-icon">#</span>
+      <span>CyberDreamer99 Social</span>
+    </a>
+    <nav class="nav" aria-label="Site eras">
+      <a href="index.html">90s Home</a>
+      <a href="web2.html">Web 2.0</a>
+      <a class="active" href="2010s.html">2010s Feed</a>
+      <a href="2010s-vlog.html">Vlog Channel</a>
+      <a href="2020s.html">Today</a>
+      <a href="2030s.html">Agent Era →</a>
+      <a href="pets.html">Mittens</a>
+      <a href="secret.html">Secret</a>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <section class="hero">
+    <div class="hero-card">
+      <span class="eyebrow">Live from 2014-ish</span>
+      <h1>Like, reblog, subscribe.</h1>
+      <p>
+        CyberDreamer99 survived guestbooks, glitter GIFs, and glossy buttons.
+        Now the whole personality has been compressed into a responsive social feed
+        with hashtags, filters, check-ins, and a suspiciously inspirational gradient.
+      </p>
+      <div class="cta-row">
+        <button class="btn" onclick="followMe()">+ Follow</button>
+        <button class="btn alt" onclick="shareStatus()">Share Status</button>
+        <a class="btn alt" href="web2.html">View 2000s Archive</a>
+        <a class="btn alt" href="2010s-vlog.html">Watch Vlog Channel</a>
+      </div>
+    </div>
+
+    <aside class="phone" aria-label="Phone preview">
+      <div class="phone-screen">
+        <div class="phone-header">
+          <span>12:47 PM</span>
+          <span>LTE 78%</span>
+        </div>
+        <div class="story-row">
+          <div class="story"><div class="story-pic">CD</div>me</div>
+          <div class="story"><div class="story-pic">🐱</div>mittens</div>
+          <div class="story"><div class="story-pic">🎧</div>playlist</div>
+          <div class="story"><div class="story-pic">☕</div>latte</div>
+          <div class="story"><div class="story-pic">🌈</div>filter</div>
+        </div>
+        <div class="mini-post">
+          <b>@cyberdreamer99</b>
+          <div class="mini-photo">LO-FI<br>SELFIE</div>
+          <div class="mini-actions">
+            <span>♡</span><span>💬</span><span>↗</span><span style="margin-left:auto;">🔖</span>
+          </div>
+          <p style="font-size:12px; margin-bottom:0;">
+            1,337 likes · brunch lighting goes hard #nofilter #actuallyfiltered
+          </p>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <div class="layout">
+    <aside>
+      <section class="sidebar-card profile">
+        <div class="avatar">CD</div>
+        <h3>CyberDreamer99</h3>
+        <div class="handle">@cyberdreamer99 · verified in my heart</div>
+        <button class="btn" onclick="followMe()" style="width:100%; justify-content:center;">Follow</button>
+        <div class="stats">
+          <span><b id="post-count">420</b>posts</span>
+          <span><b id="follower-count">12.8k</b>fans</span>
+          <span><b>8</b>apps</span>
+        </div>
+      </section>
+
+      <section class="sidebar-card">
+        <h3>Trending Now</h3>
+        <a class="trend" href="#">#ThrowbackThursday <small>GeoCities memories</small></a>
+        <a class="trend" href="#">#KeepCalmAndCodeOn <small>13.7k posts</small></a>
+        <a class="trend" href="#">#MittensGram <small>cat content wins again</small></a>
+        <a class="trend" href="#">#YOLO <small>unfortunately everywhere</small></a>
+      </section>
+
+      <section class="sidebar-card">
+        <h3>Now Streaming</h3>
+        <div class="playlist">
+          <b>♫ Somebody That I Used To Know</b>
+          <div class="progress"><span></span></div>
+          <small>scrobbled from a very legal playlist</small>
+        </div>
+      </section>
+    </aside>
+
+    <section>
+      <article class="card">
+        <div class="card-header">
+          <div class="card-avatar">CD</div>
+          <div>
+            <b>CyberDreamer99</b>
+            <div class="card-meta">checked in at The Mall · via smartphone</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>
+            finally upgraded my entire personality to the cloud. missing my old guestbook,
+            but push notifications are basically tiny guestbooks that yell at you.
+          </p>
+          <div class="post-photo">VINTAGE<br>FILTER<br>PACK</div>
+          <p><b>Caption:</b> this photo has 4 filters, 2 borders, and 0 shame.</p>
+          <div class="actions">
+            <button onclick="likePost(this)">♡ Like</button>
+            <button onclick="commentPost()">💬 Comment</button>
+            <button onclick="alert('Reposted to every connected network. Sorry!')">↻ Repost</button>
+            <span id="like-count">867 likes</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-header">
+          <div class="card-avatar" style="background:linear-gradient(135deg,#1da1f2,#0d8ddb);">t</div>
+          <div>
+            <b>Microblog Status</b>
+            <div class="card-meta">posted 3 min ago · 140 characters max in spirit</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="tweet">
+            Just realized my 1997 under construction GIF was basically agile development.
+            Shipping continuously since dial-up. #startupLife
+          </div>
+          <div class="actions">
+            <button onclick="alert('Retweeted with comment: same')">Retweet</button>
+            <button onclick="likePost(this)">Favorite</button>
+            <span>42 reposts</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-header">
+          <div class="card-avatar" style="background:linear-gradient(135deg,#ff66c4,#ffde59);">M</div>
+          <div>
+            <b>Mittens</b>
+            <div class="card-meta">uploaded from tablet · sponsored by tuna</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>Mittens has launched his personal brand. please respect his journey.</p>
+          <div class="post-photo" style="background:linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb);">CAT<br>INFLUENCER</div>
+          <div class="actions">
+            <button onclick="likePost(this)">♡ Like</button>
+            <a href="pets.html">Visit Mittens' 90s Page</a>
+            <span>2,004 likes</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <aside>
+      <section class="sidebar-card">
+        <h3>Apps I Cannot Delete</h3>
+        <div class="app-grid">
+          <div class="app" style="background:linear-gradient(135deg,#3b5998,#8b9dc3);">f</div>
+          <div class="app" style="background:linear-gradient(135deg,#1da1f2,#0d8ddb);">t</div>
+          <div class="app" style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);">◎</div>
+          <div class="app" style="background:linear-gradient(135deg,#ff0050,#00f2ea);">♪</div>
+          <div class="app" style="background:linear-gradient(135deg,#fffc00,#ffb400); color:#111;">👻</div>
+          <div class="app" style="background:linear-gradient(135deg,#ff4500,#ff8717);">r</div>
+        </div>
+      </section>
+
+      <section class="sidebar-card">
+        <h3>Activity</h3>
+        <div class="notes">
+          <b>xX_DarkAngel_Xx</b> liked your brunch post.<br><br>
+          <b>sk8er_boi_2005</b> sent you a Candy Crush request.<br><br>
+          <b>Mittens</b> is <span class="typing">typing</span>
+        </div>
+      </section>
+
+      <section class="sidebar-card">
+        <h3>2010s Checklist</h3>
+        <label><input type="checkbox" checked> Responsive layout</label><br>
+        <label><input type="checkbox" checked> Hashtag strategy</label><br>
+        <label><input type="checkbox" checked> Infinite scroll energy</label><br>
+        <label><input type="checkbox"> Privacy settings read</label>
+      </section>
+    </aside>
+  </div>
+
+  <div class="badge-row">
+    <span class="badge">HTML5 Ready</span>
+    <span class="badge">Retina-ish Display</span>
+    <span class="badge">Best Viewed On Smartphone</span>
+    <span class="badge">Cloud Synced</span>
+    <span class="badge">Hashtag Optimized</span>
+  </div>
+
+  <footer>
+    <p>
+      © 2010-2016 CyberDreamer99. Hosted spiritually on GeoCities, distributed socially everywhere else.<br>
+      This page contains gradients, rounded corners, and enough JavaScript to make 1997 nervous.
+    </p>
+  </footer>
+</main>
+
+<script>
+  var likes = 867;
+  var following = false;
+
+  function likePost(button) {
+    likes++;
+    button.textContent = "♥ Liked";
+    button.style.color = "#ff006e";
+    var el = document.getElementById("like-count");
+    if (el) el.textContent = likes.toLocaleString() + " likes";
+  }
+
+  function followMe() {
+    following = !following;
+    alert(following ? "Following CyberDreamer99. Notifications immediately enabled, obviously." : "Unfollowed. The algorithm noticed.");
+    document.getElementById("follower-count").textContent = following ? "12.9k" : "12.8k";
+  }
+
+  function shareStatus() {
+    alert("Status shared to Facebook, Twitter, Tumblr, and one forgotten app you installed in 2012.");
+  }
+
+  function commentPost() {
+    var message = prompt("Leave a comment:", "first!!!");
+    if (message) alert("Posted: " + message + " #engagement");
+  }
+</script>
+
+</body>
+</html>

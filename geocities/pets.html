@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐱 MITTENS' HOMEPAGE — #1 CAT ON THE WEB!!! 🐱</title>
+  <style>
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    @keyframes rainbow {
+      0% { color: #ff0000; }
+      16% { color: #ff8800; }
+      33% { color: #ffff00; }
+      50% { color: #00ff00; }
+      66% { color: #0088ff; }
+      83% { color: #8800ff; }
+      100% { color: #ff0000; }
+    }
+    @keyframes marquee {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes wobble {
+      0%, 100% { transform: rotate(-4deg); }
+      50% { transform: rotate(4deg); }
+    }
+    @keyframes paw {
+      0% { transform: translateX(-60px) scale(1); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateX(calc(100vw + 60px)) scale(1); opacity: 0; }
+    }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      25% { transform: scale(1.3); }
+      50% { transform: scale(1); }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #33001a;
+      background-image:
+        radial-gradient(circle at 20% 30%, #ff66cc 1px, transparent 1px),
+        radial-gradient(circle at 80% 70%, #ffffff 1px, transparent 1px),
+        radial-gradient(circle at 50% 50%, #ffff00 1px, transparent 1px),
+        radial-gradient(circle at 10% 80%, #00ffff 1px, transparent 1px),
+        radial-gradient(circle at 90% 20%, #ff00ff 1px, transparent 1px);
+      background-size: 75px 75px;
+      font-family: "Comic Sans MS", "Chalkboard SE", cursive, sans-serif;
+      color: #ffccee;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext y='24' font-size='24'%3E%F0%9F%90%BE%3C/text%3E%3C/svg%3E"), auto;
+    }
+
+    a { color: #ffff00; }
+    a:visited { color: #00ffff; }
+    a:hover {
+      color: #ffffff;
+      background: #ff0066;
+      text-decoration: blink;
+    }
+
+    .blink { animation: blink 1s step-start infinite; }
+    .rainbow { animation: rainbow 2s linear infinite; }
+    .spin { display: inline-block; animation: spin 3s linear infinite; }
+    .bounce { display: inline-block; animation: bounce 0.6s ease-in-out infinite; }
+    .wobble { display: inline-block; animation: wobble 1.2s ease-in-out infinite; }
+    .heartbeat { display: inline-block; animation: heartbeat 1.2s ease-in-out infinite; }
+
+    .marquee-wrap {
+      overflow: hidden;
+      background: linear-gradient(90deg, #ff0066, #ff66cc, #ffff00, #ff66cc, #ff0066);
+      border: 3px ridge #ffcce6;
+      padding: 4px 0;
+      margin: 8px 0;
+    }
+    .marquee-inner {
+      white-space: nowrap;
+      display: inline-block;
+      animation: marquee 12s linear infinite;
+      font-weight: bold;
+      font-size: 18px;
+      color: #330011;
+      text-shadow: 1px 1px 0 #fff;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+
+    .banner {
+      text-align: center;
+      background: #000;
+      border: 5px double #ff66cc;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .banner h1 {
+      font-size: 34px;
+      margin: 5px 0;
+      font-family: "Times New Roman", serif;
+      text-shadow: 3px 3px 0 #ff0066, -1px -1px 0 #00ffff;
+    }
+
+    .paw-track {
+      height: 34px;
+      overflow: hidden;
+      position: relative;
+      margin: 6px 0;
+    }
+
+    .paw {
+      position: absolute;
+      top: 2px;
+      font-size: 26px;
+      animation: paw 7s linear infinite;
+    }
+
+    table.layout {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 8px;
+    }
+
+    .sidebar {
+      width: 180px;
+      vertical-align: top;
+      background: #4d0026;
+      border: 4px outset #cc6699;
+      padding: 8px;
+    }
+
+    .sidebar h3 {
+      text-align: center;
+      color: #ffff00;
+      font-size: 14px;
+      margin: 0 0 8px;
+      border-bottom: 2px dotted #ff66cc;
+      padding-bottom: 4px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar li {
+      margin: 6px 0;
+      font-size: 13px;
+    }
+
+    .sidebar li::before {
+      content: "🐾 ";
+    }
+
+    .main {
+      vertical-align: top;
+      background: #26000f;
+      border: 4px inset #ff3399;
+      padding: 12px;
+    }
+
+    .divider {
+      text-align: center;
+      font-size: 20px;
+      color: #ffff00;
+      margin: 12px 0;
+      letter-spacing: 4px;
+    }
+
+    .sparkle-box {
+      border: 4px double #ff66cc;
+      background: #33001a;
+      padding: 10px;
+      margin: 8px 0;
+    }
+
+    .cat-photo {
+      width: 120px;
+      height: 100px;
+      margin: 0 auto;
+      border: 3px inset #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      background: linear-gradient(135deg, #ff66cc, #ffcc00);
+    }
+
+    .stat-table {
+      width: 100%;
+      font-size: 13px;
+      border-collapse: collapse;
+    }
+
+    .stat-table td {
+      border: 1px dotted #ff66cc;
+      padding: 4px 6px;
+    }
+
+    .stat-table td:first-child {
+      font-weight: bold;
+      color: #ffff00;
+      width: 45%;
+    }
+
+    .midi-player {
+      background: #c0c0c0;
+      border: 3px outset #fff;
+      padding: 8px;
+      margin: 10px 0;
+      color: #000;
+      font-family: "MS Sans Serif", Tahoma, sans-serif;
+      font-size: 12px;
+    }
+
+    .midi-player button {
+      background: #c0c0c0;
+      border: 2px outset #fff;
+      font-size: 11px;
+      padding: 2px 8px;
+      cursor: pointer;
+    }
+
+    .adopt-box {
+      background: #003322;
+      border: 3px dashed #00ff99;
+      padding: 10px;
+      margin: 10px 0;
+      color: #ccffee;
+      font-size: 14px;
+    }
+
+    .badge-row {
+      text-align: center;
+      margin: 15px 0;
+    }
+
+    .badge {
+      display: inline-block;
+      border: 2px outset #ccc;
+      background: #c0c0c0;
+      padding: 4px 8px;
+      margin: 4px;
+      font-size: 10px;
+      font-family: Arial, sans-serif;
+      color: #000;
+    }
+
+    .home-btn {
+      display: inline-block;
+      background: linear-gradient(180deg, #ffff00, #ff0066);
+      border: 3px outset #ff99cc;
+      padding: 6px 16px;
+      font-weight: bold;
+      color: #330011;
+      text-decoration: none;
+      font-size: 14px;
+      margin: 4px;
+    }
+
+    .home-btn:active { border-style: inset; }
+
+    .cat-ascii {
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      line-height: 1.1;
+      color: #ff99cc;
+      white-space: pre;
+      text-align: center;
+    }
+
+    .new-tag {
+      background: #ff0000;
+      color: #ffff00;
+      font-size: 10px;
+      padding: 1px 4px;
+      font-weight: bold;
+      animation: blink 0.8s step-start infinite;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 11px;
+      color: #cc6699;
+      margin-top: 20px;
+      font-family: "Times New Roman", serif;
+    }
+
+    hr.fancy {
+      border: none;
+      height: 20px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20'%3E%3Ctext x='0' y='16' font-size='16'%3E%F0%9F%90%BE%3C/text%3E%3C/svg%3E") repeat-x center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="banner">
+    <div class="bounce">🐱</div>
+    <h1><span class="rainbow">~*~ MITTENS' HOMEPAGE!!! ~*~</span></h1>
+    <p style="font-size:14px; color:#00ffff;">
+      <span class="blink">🐾</span> the #1 cutest cat on the whole entire internet <span class="blink">🐾</span>
+    </p>
+    <p style="font-size:12px; color:#ff66cc;">Purr-sonal page maintained by his hooman, CyberDreamer99</p>
+  </div>
+
+  <div class="paw-track">
+    <div class="paw">🐾</div>
+  </div>
+
+  <div class="marquee-wrap">
+    <div class="marquee-inner">
+      🐱彡 MITTENS SAYS MEOW!!! 彡🐱 PLZ SIGN HIS GUESTBOOK 彡🐱 HE LIKES TUNA AND KNOCKING THINGS OFF TABLES 彡🐱 VOTED CUTEST CAT 1997 彡🐱
+    </div>
+  </div>
+
+  <table class="layout">
+    <tr>
+      <td class="sidebar">
+        <h3>🐾 CAT MENU</h3>
+        <ul>
+          <li><a href="index.html">← Back 2 Home</a></li>
+          <li><a href="#bio">Mittens' Bio</a></li>
+          <li><a href="#gallery">Photo Gallery</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="#facts">Fun Cat Facts</a></li>
+          <li><a href="#adopt">Virtual Adopt</a></li>
+          <li><a href="awards.html">Awards 🏆</a></li>
+          <li><a href="midi.html">MIDI Collection 🎵</a></li>
+          <li><a href="secret.html">Secret Page 🔒</a></li>
+        </ul>
+
+        <hr class="fancy">
+
+        <h3>🎵 NOW PLAYING</h3>
+        <div class="midi-player">
+          <div>📼 meow_mix.mid</div>
+          <div style="margin:6px 0;">
+            <button onclick="alert('Error: MIDI plugin not found. Mittens ate it.')">▶ Play</button>
+            <button onclick="alert('Stopped. Mittens is napping.')">■ Stop</button>
+          </div>
+          <div>Volume: ███████░░░</div>
+        </div>
+
+        <h3>😺 MOOD-O-METER</h3>
+        <p style="font-size:11px; text-align:center; color:#ffccee;">
+          <span class="spin">😻</span><br>
+          Current mood:<br>
+          <span class="blink">HUNGRY!!!</span>
+        </p>
+      </td>
+
+      <td class="main">
+        <div id="bio" class="sparkle-box">
+          <h2 style="color:#ffff00; text-align:center; font-family:'Times New Roman',serif;">
+            😻 ALL ABOUT MITTENS 😻
+          </h2>
+          <div style="text-align:center;">
+            <div class="cat-photo">🐱</div>
+            <br><small>Mittens looking majestic!!!</small>
+          </div>
+          <p>
+            This is <b style="color:#ff66cc;">Mittens</b>, the best cat in the ENTIRE WORLD!!!
+            He is a fluffy orange tabby who I rescued from a cardboard box behind the mall.
+            Now he rules the house with an iron paw. <span class="wobble">🐾</span>
+          </p>
+          <table class="stat-table">
+            <tr><td>Name</td><td>Sir Mittens von Whiskers III</td></tr>
+            <tr><td>Age</td><td>3 (that's like 28 in cat years)</td></tr>
+            <tr><td>Fav Food</td><td>Tuna, obviously</td></tr>
+            <tr><td>Fav Activity</td><td>Knocking pens off the desk</td></tr>
+            <tr><td>Superpower</td><td>Sleeping 20 hrs a day</td></tr>
+            <tr><td>Enemy</td><td>The vacuum cleaner 😾</td></tr>
+          </table>
+        </div>
+
+        <div class="divider">🐾 · ･ ゜゜・。。・゜゜·。 · ゜゜・。。・゜゜·。 🐾</div>
+
+        <div id="gallery">
+          <h3 style="color:#ff66cc; text-align:center;">📸 MITTENS PHOTO GALLERY 📸</h3>
+          <table width="100%" cellpadding="4">
+            <tr>
+              <td width="33%" align="center" style="background:#4d0026; border:2px solid #ff66cc; padding:8px;">
+                <div class="cat-photo" style="width:100px;height:80px;font-size:32px;">😺</div>
+                <br><small>sleepy time!!!</small>
+              </td>
+              <td width="33%" align="center" style="background:#330033; border:2px solid #00ffff; padding:8px;">
+                <div class="cat-photo" style="width:100px;height:80px;font-size:32px;background:linear-gradient(135deg,#00ffff,#ff00ff);">🙀</div>
+                <br><small>saw the vacuum</small>
+              </td>
+              <td width="33%" align="center" style="background:#333300; border:2px solid #ffff00; padding:8px;">
+                <div class="cat-photo" style="width:100px;height:80px;font-size:32px;background:linear-gradient(135deg,#ffff00,#ff0066);">😻</div>
+                <br><small>got the tuna!!!</small>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="cat-ascii">
+     /\_/\
+    ( o.o )
+     > ^ <
+   MEOW!!!
+        </div>
+
+        <div class="divider">✧･ﾟ: *✧･ﾟ:* *:･ﾟ✧*:･ﾟ✧</div>
+
+        <div id="facts" class="sparkle-box">
+          <h3 style="color:#ffff00; margin-top:0;">🐈 FUN CAT FACTS!!! 🐈</h3>
+          <ul style="font-size:14px; line-height:1.8;">
+            <li>Cats sleep 70% of their lives (Mittens is overachieving)</li>
+            <li>A group of cats is called a "clowder" (WOW)</li>
+            <li>Mittens can hear a can of tuna open from 3 rooms away</li>
+            <li>Cats have 32 muscles in each ear!!!</li>
+            <li>Mittens has personally destroyed 14 rolls of toilet paper</li>
+          </ul>
+        </div>
+
+        <div class="divider">🐾 · ･ ゜゜・。。・゜゜·。 · ･ 🐾</div>
+
+        <div id="adopt" class="adopt-box">
+          <h3 style="color:#00ff99; margin-top:0;">🐾 ADOPT A VIRTUAL KITTEN!!! 🐾</h3>
+          <p>Take home ur very own cyber-kitty!!! Feed it, love it, and it will live on ur desktop 4 eva!!!</p>
+          <form onsubmit="adoptKitten(); return false;">
+            <label>Name ur kitten:
+              <input type="text" id="kittenName" style="background:#000;color:#00ff99;border:1px solid #00ff99;font-family:'Comic Sans MS',cursive;padding:4px;">
+            </label>
+            <br><br>
+            <input type="submit" value="😻 ADOPT NOW!!!" style="background:#00ff99;color:#003322;border:3px outset #66ffcc;font-weight:bold;cursor:pointer;padding:4px 12px;font-family:'Comic Sans MS',cursive;">
+          </form>
+          <p id="adoptResult" style="margin-bottom:0;"></p>
+        </div>
+
+        <div class="divider">★ · ･ ゜゜・。。・゜゜·。 · ･ ★</div>
+
+        <p style="text-align:center;">
+          You have petted Mittens <span class="heartbeat" style="color:#ff0066;">❤️</span>
+          <b id="petCount" style="color:#ffff00;">0</b> times!!!
+          <br>
+          <button onclick="petMittens()" style="background:#ff0066;color:#fff;border:3px outset #ff99cc;font-weight:bold;cursor:pointer;padding:6px 16px;font-family:'Comic Sans MS',cursive;font-size:16px;margin-top:8px;">
+            🐱 PET MITTENS!!! 🐱
+          </button>
+        </p>
+
+        <p style="text-align:center; margin-top:16px;">
+          <a class="home-btn" href="index.html">🏠 BACK 2 HOMEPAGE</a>
+          <a class="home-btn" href="awards.html">🏆 AWARDS</a>
+        </p>
+      </td>
+    </tr>
+  </table>
+
+  <div class="badge-row">
+    <span class="badge" style="background:#ff99cc;">Cat Lover<br>Certified</span>
+    <span class="badge" style="background:#ffcc00;">Best viewed<br>Netscape 4.0</span>
+    <span class="badge" style="background:#00ccff;">#1 Cat<br>On The Web</span>
+    <span class="badge" style="background:#ff6699;">GeoCities<br>Pet Ring</span>
+    <span class="badge" style="background:#99ff99;">Tuna<br>Approved</span>
+  </div>
+
+  <footer>
+    <p>
+      © 1997 CyberDreamer99 &amp; Mittens. All Purrs Reserved.<br>
+      Hosted on <b style="color:#ff66cc;">GeoCities</b> — Neighborhood: <i>Area51/DimensionX/CatCorner</i><br>
+      <span style="font-size:9px;">No cats were knocked off tables in the making of this page. (some pens were.)</span>
+    </p>
+    <p class="blink" style="color:#ff0066; font-size:14px;">🐾 THANKS 4 VISITING MITTENS!!! MEOW!!! 🐾</p>
+  </footer>
+
+</div>
+
+<script>
+  var petCount = 0;
+  function petMittens() {
+    petCount++;
+    document.getElementById('petCount').textContent = petCount;
+    if (petCount === 10) alert('Mittens is purring VERY loudly now. 😻');
+    if (petCount === 25) alert('Mittens has had enough petting and gently bites u. 😾');
+  }
+
+  function adoptKitten() {
+    var name = document.getElementById('kittenName').value.trim() || 'Fluffy';
+    document.getElementById('adoptResult').innerHTML =
+      '🎉 Congratulations!!! U adopted <b style="color:#ffff00;">' + name +
+      '</b>!!! Please do not close this window or ' + name + ' will get lonely. 😿';
+  }
+</script>
+
+</body>
+</html>

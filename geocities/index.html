@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>~*~ Welcome 2 My Homepage!!! ~*~</title>
+  <style>
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    @keyframes rainbow {
+      0% { color: #ff0000; }
+      16% { color: #ff8800; }
+      33% { color: #ffff00; }
+      50% { color: #00ff00; }
+      66% { color: #0088ff; }
+      83% { color: #8800ff; }
+      100% { color: #ff0000; }
+    }
+    @keyframes marquee {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes construction {
+      0%, 100% { background-position: 0 0; }
+      100% { background-position: 40px 0; }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000033;
+      background-image:
+        radial-gradient(circle at 20% 30%, #ffff00 1px, transparent 1px),
+        radial-gradient(circle at 80% 70%, #ffffff 1px, transparent 1px),
+        radial-gradient(circle at 50% 50%, #00ffff 1px, transparent 1px),
+        radial-gradient(circle at 10% 80%, #ff00ff 1px, transparent 1px),
+        radial-gradient(circle at 90% 20%, #ff0000 1px, transparent 1px);
+      background-size: 80px 80px;
+      font-family: "Comic Sans MS", "Chalkboard SE", cursive, sans-serif;
+      color: #00ff00;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext y='24' font-size='24'%3E%E2%98%85%3C/text%3E%3C/svg%3E"), auto;
+    }
+
+    a { color: #ff00ff; }
+    a:visited { color: #00ffff; }
+    a:hover {
+      color: #ffff00;
+      background: #ff0000;
+      text-decoration: blink;
+    }
+
+    .blink { animation: blink 1s step-start infinite; }
+    .rainbow { animation: rainbow 2s linear infinite; }
+    .spin { display: inline-block; animation: spin 3s linear infinite; }
+    .bounce { display: inline-block; animation: bounce 0.6s ease-in-out infinite; }
+
+    .marquee-wrap {
+      overflow: hidden;
+      background: linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff);
+      border: 3px ridge #c0c0c0;
+      padding: 4px 0;
+      margin: 8px 0;
+    }
+    .marquee-inner {
+      white-space: nowrap;
+      display: inline-block;
+      animation: marquee 12s linear infinite;
+      font-weight: bold;
+      font-size: 18px;
+      color: #000;
+      text-shadow: 1px 1px 0 #fff;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+
+    .banner {
+      text-align: center;
+      background: #000;
+      border: 5px double #ff00ff;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .banner h1 {
+      font-size: 36px;
+      margin: 5px 0;
+      font-family: "Times New Roman", serif;
+      text-shadow: 3px 3px 0 #ff0000, -1px -1px 0 #00ffff;
+    }
+
+    .construction {
+      background: repeating-linear-gradient(
+        -45deg,
+        #ffcc00,
+        #ffcc00 10px,
+        #000 10px,
+        #000 20px
+      );
+      background-size: 40px 40px;
+      animation: construction 1s linear infinite;
+      border: 3px solid #000;
+      padding: 8px;
+      text-align: center;
+      font-weight: bold;
+      color: #000;
+      font-size: 20px;
+      margin: 10px 0;
+    }
+
+    table.layout {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 8px;
+    }
+
+    .sidebar {
+      width: 180px;
+      vertical-align: top;
+      background: #330066;
+      border: 4px outset #9966cc;
+      padding: 8px;
+    }
+
+    .sidebar h3 {
+      text-align: center;
+      color: #ffff00;
+      font-size: 14px;
+      margin: 0 0 8px;
+      border-bottom: 2px dotted #ff00ff;
+      padding-bottom: 4px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar li {
+      margin: 6px 0;
+      font-size: 13px;
+    }
+
+    .sidebar li::before {
+      content: "► ";
+      color: #ff0000;
+    }
+
+    .main {
+      vertical-align: top;
+      background: #000066;
+      border: 4px inset #3366ff;
+      padding: 12px;
+    }
+
+    .divider {
+      text-align: center;
+      font-size: 20px;
+      color: #ffff00;
+      margin: 12px 0;
+      letter-spacing: 4px;
+    }
+
+    .guestbook {
+      background: #003300;
+      border: 3px dashed #00ff00;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
+    .counter {
+      font-family: "Courier New", monospace;
+      background: #000;
+      color: #ff0000;
+      border: 2px inset #666;
+      padding: 4px 8px;
+      display: inline-block;
+      font-size: 22px;
+      letter-spacing: 4px;
+    }
+
+    .midi-player {
+      background: #c0c0c0;
+      border: 3px outset #fff;
+      padding: 8px;
+      margin: 10px 0;
+      color: #000;
+      font-family: "MS Sans Serif", Tahoma, sans-serif;
+      font-size: 12px;
+    }
+
+    .midi-player button {
+      background: #c0c0c0;
+      border: 2px outset #fff;
+      font-size: 11px;
+      padding: 2px 8px;
+      cursor: pointer;
+    }
+
+    .webring {
+      text-align: center;
+      background: #660000;
+      border: 3px ridge #ff6600;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .badge-row {
+      text-align: center;
+      margin: 15px 0;
+    }
+
+    .badge {
+      display: inline-block;
+      border: 2px outset #ccc;
+      background: #c0c0c0;
+      padding: 4px 8px;
+      margin: 4px;
+      font-size: 10px;
+      font-family: Arial, sans-serif;
+      color: #000;
+    }
+
+    .email-btn {
+      display: inline-block;
+      background: linear-gradient(180deg, #ffff00, #ff8800);
+      border: 3px outset #ffcc00;
+      padding: 6px 16px;
+      font-weight: bold;
+      color: #0000cc;
+      text-decoration: none;
+      font-size: 16px;
+      margin: 8px 0;
+    }
+
+    .email-btn:active {
+      border-style: inset;
+    }
+
+    .sparkle-box {
+      border: 4px double #ff00ff;
+      background: #1a0033;
+      padding: 10px;
+      margin: 8px 0;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 11px;
+      color: #888;
+      margin-top: 20px;
+      font-family: "Times New Roman", serif;
+    }
+
+    .fire-ascii {
+      font-family: "Courier New", monospace;
+      font-size: 10px;
+      line-height: 1.1;
+      color: #ff6600;
+      white-space: pre;
+      text-align: center;
+    }
+
+    .new-tag {
+      background: #ff0000;
+      color: #ffff00;
+      font-size: 10px;
+      padding: 1px 4px;
+      font-weight: bold;
+      animation: blink 0.8s step-start infinite;
+    }
+
+    hr.fancy {
+      border: none;
+      height: 20px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20'%3E%3Ctext x='0' y='16' font-size='16' fill='%23ffff00'%3E%E2%98%85%3C/text%3E%3C/svg%3E") repeat-x center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="banner">
+    <div class="bounce">🌟</div>
+    <h1><span class="rainbow">~*~ WELCOME 2 MY HOMEPAGE!!! ~*~</span></h1>
+    <p style="font-size:14px; color:#00ffff;">
+      <span class="blink">★</span>
+      You are visitor #<span class="counter" id="counter">000,042</span>
+      <span class="blink">★</span>
+    </p>
+    <p style="font-size:12px; color:#ff00ff;">Last Updated: July 6, 1997 (probably)</p>
+  </div>
+
+  <div class="construction">
+    🚧 UNDER CONSTRUCTION 🚧 &nbsp; PLEASE EXCUSE THE DUST!!! &nbsp; 🚧
+  </div>
+
+  <div class="marquee-wrap">
+    <div class="marquee-inner">
+      ★彡★彡 WELCOME!!! SIGN MY GUESTBOOK!!! ★彡★彡 BEST VIEWED IN NETSCAPE NAVIGATOR 4.0 @ 800x600 ★彡★彡 YOU ARE NOW ENTERING THE COOLEST SITE ON THE WEB ★彡★彡
+    </div>
+  </div>
+
+  <table class="layout">
+    <tr>
+      <td class="sidebar">
+        <h3>🔗 COOL LINKS</h3>
+        <ul>
+          <li><a href="#about">About Me</a></li>
+          <li><a href="#pics">My Pics</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="#links">Linkz</a></li>
+          <li><a href="#guestbook">Guestbook</a></li>
+          <li><a href="mailto:webmaster@geocities.com">Email Me!!!</a></li>
+          <li><a href="awards.html">Awards I've Won</a></li>
+          <li><a href="pets.html">My Cat Mittens 🐱</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="tamagotchi.html">My Tamagotchi Shrine 🥚</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="midi.html">My MIDI Collection</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="buffy.html">Buffy Shrine 🦇</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="aliens.html">UFO Zone 🛸</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="y2k.html">Y2K Survival Bunker 💾</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="screensaver.html">Screensaver Aquarium 🐠</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="mall.html">Neon Mall Arcade 🛍️</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="jacob.html">The Jacob Homepage ⚡</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="secret.html">Secret Page 🔒</a></li>
+          <li><a href="quiz.html">Personality Quiz 🔮</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="web2.html">My Web 2.0 Profile</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="2010s.html">My 2010s Feed</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="2010s-vlog.html">My Vlog Channel</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="2020s.html">My Site Today</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="2030s.html">The Agent Era 🤖</a> <span class="new-tag">NEW!</span></li>
+        </ul>
+
+        <hr class="fancy">
+
+        <h3>🎵 NOW PLAYING</h3>
+        <div class="midi-player">
+          <div>📼 midifile.mid</div>
+          <div style="margin:6px 0;">
+            <button onclick="alert('Error: MIDI plugin not found. Please install Crescendo!')">▶ Play</button>
+            <button onclick="alert('Stopped.')">■ Stop</button>
+          </div>
+          <div>Volume: ████████░░</div>
+        </div>
+
+        <h3>🌐 WEB RING</h3>
+        <p style="font-size:11px; text-align:center;">
+          <a href="#">« Prev</a><br>
+          <span class="spin">🌍</span><br>
+          <a href="#">Random</a> |
+          <a href="#">Next »</a>
+        </p>
+      </td>
+
+      <td class="main">
+        <div id="about" class="sparkle-box">
+          <h2 style="color:#ffff00; text-align:center; font-family:'Times New Roman',serif;">
+            ✨ ABOUT ME ✨
+          </h2>
+          <p>
+            Hiiii!!! <span class="blink">*waves*</span> My name is <b style="color:#ff00ff;">CyberDreamer99</b>
+            and this is my personal homepage on the Information Superhighway!!!
+          </p>
+          <p>
+            I luv: <span class="rainbow">HTML, Tamagotchis, Buffy, AOL Instant Messenger, and my cat Mittens 🐱</span>
+          </p>
+          <p style="font-size:13px; color:#00ffff;">
+            Mood: <b>^_^</b> &nbsp;|&nbsp; Listening to: <i>Smash Mouth - All Star</i> &nbsp;|&nbsp; Status: <span class="blink">ONLINE!!!</span>
+          </p>
+        </div>
+
+        <div class="divider">★ · ･ ゜゜・。。・゜゜·。 · ゜゜・。。・゜゜·。 ★</div>
+
+        <div id="pics">
+          <h3 style="color:#ff6600; text-align:center;">📸 MY AWESOME PIX 📸</h3>
+          <table width="100%" cellpadding="4">
+            <tr>
+              <td width="33%" align="center" style="background:#330033; border:2px solid #ff00ff; padding:8px;">
+                <div style="width:100px;height:80px;background:linear-gradient(135deg,#ff00ff,#00ffff);margin:0 auto;border:2px inset #fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;">
+                  [PHOTO<br>NOT<br>FOUND]
+                </div>
+                <br><small>me @ the mall!!!</small>
+              </td>
+              <td width="33%" align="center" style="background:#003333; border:2px solid #00ff00; padding:8px;">
+                <div style="width:100px;height:80px;background:linear-gradient(135deg,#ffff00,#ff0000);margin:0 auto;border:2px inset #fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;">
+                  [PHOTO<br>NOT<br>FOUND]
+                </div>
+                <br><small>my cat!!!</small>
+              </td>
+              <td width="33%" align="center" style="background:#333300; border:2px solid #ffff00; padding:8px;">
+                <div style="width:100px;height:80px;background:linear-gradient(135deg,#00ff00,#0000ff);margin:0 auto;border:2px inset #fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;">
+                  [PHOTO<br>NOT<br>FOUND]
+                </div>
+                <br><small>me &amp; friends!!!</small>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="divider">✧･ﾟ: *✧･ﾟ:* *:･ﾟ✧*:･ﾟ✧</div>
+
+        <div id="links">
+          <h3 style="color:#00ff00;">🔗 MY FAVORITE LINKZ 🔗</h3>
+          <ul style="font-size:14px; line-height:2;">
+            <li><a href="http://www.yahoo.com">Yahoo!!!</a> — the best search engine EVER</li>
+            <li><a href="#">Hamster Dance</a> — u HAVE 2 see this!!!</li>
+            <li><a href="#">AltaVista</a> — for the REAL internet pros</li>
+            <li><a href="#">Angelfire</a> — free web hosting 4 eva</li>
+            <li><a href="#">Cool Site of the Day</a></li>
+          </ul>
+        </div>
+
+        <div class="fire-ascii">
+    )  (
+   (    )
+  (_\  /_)
+   / \/ \
+   \    /
+    )  (
+        </div>
+
+        <div id="guestbook" class="guestbook">
+          <h3 style="color:#ffff00; margin-top:0;">📝 SIGN MY GUESTBOOK!!! 📝</h3>
+          <p>Leave a message 4 me!!! Don't forget 2 tell me what u think of my page!!!</p>
+          <form onsubmit="alert('Thanks 4 signing!!! (guestbook is full)'); return false;">
+            <label>Name: <input type="text" style="background:#000;color:#0f0;border:1px solid #0f0;font-family:'Comic Sans MS',cursive;"></label><br><br>
+            <label>Message:<br>
+              <textarea rows="3" cols="40" style="background:#000;color:#0f0;border:1px solid #0f0;font-family:'Comic Sans MS',cursive;"></textarea>
+            </label><br><br>
+            <input type="submit" value="✍️ SIGN IT!!!" style="background:#ff00ff;color:#ffff00;border:3px outset #ff66ff;font-weight:bold;cursor:pointer;padding:4px 12px;font-family:'Comic Sans MS',cursive;">
+          </form>
+        </div>
+
+        <p style="text-align:center;">
+          <a class="email-btn" href="mailto:webmaster@geocities.com?subject=UR SITE ROX!!!">
+            ✉️ EMAIL ME!!! ✉️
+          </a>
+        </p>
+      </td>
+    </tr>
+  </table>
+
+  <div class="webring">
+  <b>🌐 MEMBER OF THE "COOL KIDS OF THE WEB" WEBRING 🌐</b><br>
+    <a href="#">[ Prev Site ]</a> &nbsp;|&nbsp;
+    <a href="#">[ Hub ]</a> &nbsp;|&nbsp;
+    <a href="#">[ Next Site ]</a>
+  </div>
+
+  <div class="badge-row">
+    <span class="badge">Best viewed<br>Netscape 4.0</span>
+    <span class="badge" style="background:#ffcc00;">Made with<br>Notepad</span>
+    <span class="badge" style="background:#00ccff;">HTML 3.2<br>Valid!!!</span>
+    <span class="badge" style="background:#ff6699;">GeoCities<br>Member</span>
+    <span class="badge" style="background:#99ff99;">Y2K<br>Ready!!!</span>
+    <span class="badge" style="background:#cc99ff;">AOL<br>Free Hours</span>
+  </div>
+
+  <footer>
+    <p>
+      © 1997 CyberDreamer99. All Rights Reserved.<br>
+      This page is hosted on <b style="color:#ff6600;">GeoCities</b> — Neighborhood: <i>Area51/DimensionX</i><br>
+      <span style="font-size:9px;">No part of this website may be reproduced without written permission.<br>
+      Optimized for 56k modems. Page loads in approximately 45 seconds.</span>
+    </p>
+    <p class="blink" style="color:#ff0000; font-size:14px;">★ THANK U 4 VISITING!!! COME BACK SOON!!! ★</p>
+  </footer>
+
+</div>
+
+<script>
+  // Fake hit counter — very authentic
+  (function () {
+    var el = document.getElementById('counter');
+    var n = 42 + Math.floor(Math.random() * 900);
+    var s = String(n).padStart(6, '0');
+    el.textContent = s.slice(0, 3) + ',' + s.slice(3);
+    setInterval(function () {
+      n++;
+      s = String(n).padStart(6, '0');
+      el.textContent = s.slice(0, 3) + ',' + s.slice(3);
+    }, 8000);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "slack-offline-nudge",
+  "version": "1.0.0",
+  "description": "DM teammates \"any updates?\" as soon as their Slack presence goes inactive",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@slack/web-api": "^7.9.1"
+  }
+}

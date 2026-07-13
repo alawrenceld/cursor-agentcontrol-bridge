@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🥚 CYBERDREAMER99'S TAMAGOTCHI SHRINE!!! 🥚</title>
+  <style>
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    @keyframes rainbow {
+      0% { color: #ff0000; }
+      16% { color: #ff8800; }
+      33% { color: #ffff00; }
+      50% { color: #00ff00; }
+      66% { color: #0088ff; }
+      83% { color: #8800ff; }
+      100% { color: #ff0000; }
+    }
+    @keyframes marquee {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes wobble {
+      0%, 100% { transform: rotate(-5deg); }
+      50% { transform: rotate(5deg); }
+    }
+    @keyframes egg-bob {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-6px) scale(1.05); }
+    }
+    @keyframes lcd-flicker {
+      0%, 97%, 100% { opacity: 1; }
+      98% { opacity: 0.85; }
+      99% { opacity: 0.95; }
+    }
+    @keyframes poop-drop {
+      0% { transform: translateY(-20px); opacity: 0; }
+      30% { opacity: 1; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes beep-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 255, 0.6); }
+      50% { box-shadow: 0 0 12px 4px rgba(255, 0, 255, 0.3); }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #1a0033;
+      background-image:
+        radial-gradient(circle at 20% 30%, #ff66cc 1px, transparent 1px),
+        radial-gradient(circle at 80% 70%, #ffffff 1px, transparent 1px),
+        radial-gradient(circle at 50% 50%, #00ffff 1px, transparent 1px),
+        radial-gradient(circle at 10% 80%, #ffff00 1px, transparent 1px),
+        radial-gradient(circle at 90% 20%, #ff00ff 1px, transparent 1px);
+      background-size: 72px 72px;
+      font-family: "Comic Sans MS", "Chalkboard SE", cursive, sans-serif;
+      color: #ccffee;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext y='24' font-size='24'%3E%F0%9F%A5%9A%3C/text%3E%3C/svg%3E"), auto;
+    }
+
+    a { color: #ffff00; }
+    a:visited { color: #00ffff; }
+    a:hover {
+      color: #ffffff;
+      background: #ff0099;
+      text-decoration: blink;
+    }
+
+    .blink { animation: blink 1s step-start infinite; }
+    .rainbow { animation: rainbow 2s linear infinite; }
+    .spin { display: inline-block; animation: spin 3s linear infinite; }
+    .bounce { display: inline-block; animation: bounce 0.6s ease-in-out infinite; }
+    .wobble { display: inline-block; animation: wobble 1.4s ease-in-out infinite; }
+
+    .marquee-wrap {
+      overflow: hidden;
+      background: linear-gradient(90deg, #ff0099, #ff6600, #ffff00, #00ff99, #0099ff, #cc66ff);
+      border: 3px ridge #c0c0c0;
+      padding: 4px 0;
+      margin: 8px 0;
+    }
+    .marquee-inner {
+      white-space: nowrap;
+      display: inline-block;
+      animation: marquee 14s linear infinite;
+      font-weight: bold;
+      font-size: 18px;
+      color: #000;
+      text-shadow: 1px 1px 0 #fff;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+
+    .banner {
+      text-align: center;
+      background: linear-gradient(180deg, #330066, #110022);
+      border: 5px double #ff00cc;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .banner h1 {
+      font-size: 32px;
+      margin: 5px 0;
+      font-family: "Times New Roman", serif;
+      text-shadow: 3px 3px 0 #ff0099, -1px -1px 0 #00ffff;
+    }
+
+    table.layout {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 8px;
+    }
+
+    .sidebar {
+      width: 180px;
+      vertical-align: top;
+      background: #004466;
+      border: 4px outset #00ccff;
+      padding: 8px;
+    }
+
+    .sidebar h3 {
+      text-align: center;
+      color: #ffff00;
+      font-size: 14px;
+      margin: 0 0 8px;
+      border-bottom: 2px dotted #ff00ff;
+      padding-bottom: 4px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar li {
+      margin: 6px 0;
+      font-size: 13px;
+    }
+
+    .sidebar li::before {
+      content: "🥚 ";
+    }
+
+    .main {
+      vertical-align: top;
+      background: #002244;
+      border: 4px inset #0099cc;
+      padding: 12px;
+    }
+
+    .divider {
+      text-align: center;
+      font-size: 18px;
+      color: #ffff00;
+      margin: 12px 0;
+      letter-spacing: 3px;
+    }
+
+    .sparkle-box {
+      border: 4px double #ff00ff;
+      background: #1a0044;
+      padding: 10px;
+      margin: 8px 0;
+    }
+
+    .midi-player {
+      background: #c0c0c0;
+      border: 3px outset #fff;
+      padding: 8px;
+      margin: 10px 0;
+      color: #000;
+      font-family: "MS Sans Serif", Tahoma, sans-serif;
+      font-size: 12px;
+    }
+
+    .midi-player button {
+      background: #c0c0c0;
+      border: 2px outset #fff;
+      font-size: 11px;
+      padding: 2px 8px;
+      cursor: pointer;
+    }
+
+    .home-btn {
+      display: inline-block;
+      background: linear-gradient(180deg, #ffff00, #ff8800);
+      border: 3px outset #ffcc00;
+      padding: 6px 16px;
+      font-weight: bold;
+      color: #0000cc;
+      text-decoration: none;
+      font-size: 14px;
+      margin: 4px;
+    }
+
+    .home-btn:active { border-style: inset; }
+
+    .badge-row {
+      text-align: center;
+      margin: 15px 0;
+    }
+
+    .badge {
+      display: inline-block;
+      border: 2px outset #ccc;
+      background: #c0c0c0;
+      padding: 4px 8px;
+      margin: 4px;
+      font-size: 10px;
+      font-family: Arial, sans-serif;
+      color: #000;
+    }
+
+    .new-tag {
+      background: #ff0000;
+      color: #ffff00;
+      font-size: 10px;
+      padding: 1px 4px;
+      font-weight: bold;
+      animation: blink 0.8s step-start infinite;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 11px;
+      color: #88aacc;
+      margin-top: 20px;
+      font-family: "Times New Roman", serif;
+    }
+
+    hr.fancy {
+      border: none;
+      height: 20px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20'%3E%3Ctext x='0' y='16' font-size='16'%3E%F0%9F%A5%9A%3C/text%3E%3C/svg%3E") repeat-x center;
+    }
+
+    /* ---------- Tamagotchi device ---------- */
+    .tama-device {
+      max-width: 280px;
+      margin: 0 auto 16px;
+      background: linear-gradient(145deg, #ffb3d9, #ff66aa, #ff3399);
+      border: 6px ridge #ff99cc;
+      border-radius: 40px 40px 28px 28px;
+      padding: 18px 16px 22px;
+      box-shadow: 0 8px 0 #cc0066, inset 0 2px 8px rgba(255,255,255,0.4);
+    }
+
+    .tama-device.beeping {
+      animation: beep-pulse 0.5s ease-in-out infinite;
+    }
+
+    .tama-keychain {
+      width: 40px;
+      height: 14px;
+      background: #c0c0c0;
+      border: 2px inset #888;
+      border-radius: 6px;
+      margin: 0 auto 8px;
+    }
+
+    .lcd-screen {
+      background: #9cb86c;
+      border: 4px inset #5a7040;
+      border-radius: 8px;
+      padding: 10px 8px 6px;
+      min-height: 130px;
+      animation: lcd-flicker 4s step-start infinite;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .lcd-screen::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.03) 2px,
+        rgba(0,0,0,0.03) 4px
+      );
+      pointer-events: none;
+    }
+
+    .lcd-pet {
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      line-height: 1.05;
+      color: #2a3a18;
+      white-space: pre;
+      text-align: center;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lcd-pet .creature {
+      display: inline-block;
+      animation: egg-bob 2s ease-in-out infinite;
+    }
+
+    .lcd-status {
+      font-family: "Courier New", monospace;
+      font-size: 10px;
+      color: #2a3a18;
+      text-align: center;
+      margin-top: 6px;
+      font-weight: bold;
+    }
+
+    .poop-zone {
+      text-align: center;
+      min-height: 18px;
+      font-size: 14px;
+    }
+
+    .poop {
+      display: inline-block;
+      animation: poop-drop 0.4s ease-out;
+    }
+
+    .tama-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .tama-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 3px outset #ddd;
+      background: radial-gradient(circle at 30% 30%, #fff, #aaa);
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 30px;
+      text-align: center;
+      padding: 0;
+    }
+
+    .tama-btn:active {
+      border-style: inset;
+      transform: scale(0.95);
+    }
+
+    .care-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .care-btn {
+      background: linear-gradient(180deg, #00ccff, #006699);
+      border: 3px outset #66ddff;
+      color: #fff;
+      font-family: "Comic Sans MS", cursive;
+      font-weight: bold;
+      font-size: 13px;
+      padding: 8px 4px;
+      cursor: pointer;
+    }
+
+    .care-btn:active { border-style: inset; }
+
+    .care-btn.feed { background: linear-gradient(180deg, #ff9900, #cc5500); border-color: #ffcc66; }
+    .care-btn.play { background: linear-gradient(180deg, #ff66cc, #cc0066); border-color: #ff99dd; }
+    .care-btn.clean { background: linear-gradient(180deg, #66ff99, #009944); border-color: #99ffcc; }
+    .care-btn.discipline { background: linear-gradient(180deg, #9966ff, #4400aa); border-color: #cc99ff; }
+
+    .stat-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin: 8px 0;
+    }
+
+    .stat-table td {
+      border: 1px solid #0099cc;
+      padding: 4px 8px;
+    }
+
+    .stat-table td:first-child {
+      background: #003355;
+      color: #00ffff;
+      font-weight: bold;
+      width: 35%;
+    }
+
+    .meter {
+      background: #001122;
+      border: 2px inset #666;
+      height: 14px;
+      position: relative;
+    }
+
+    .meter-fill {
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+
+    .meter-fill.hunger { background: linear-gradient(90deg, #ff6600, #ffcc00); }
+    .meter-fill.happy { background: linear-gradient(90deg, #ff0099, #ff66cc); }
+    .meter-fill.discipline { background: linear-gradient(90deg, #6600cc, #9966ff); }
+
+    .evolution-chart {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 8px;
+      text-align: center;
+      font-size: 11px;
+    }
+
+    .evo-stage {
+      background: #003366;
+      border: 2px solid #00ccff;
+      padding: 8px;
+      min-width: 90px;
+    }
+
+    .evo-stage.active {
+      border-color: #ffff00;
+      background: #004488;
+      box-shadow: 0 0 8px #ffff00;
+    }
+
+    .evo-stage pre {
+      font-family: "Courier New", monospace;
+      font-size: 9px;
+      line-height: 1;
+      margin: 4px 0;
+      color: #ccffee;
+    }
+
+    .care-log {
+      background: #000;
+      border: 2px inset #333;
+      color: #00ff00;
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      padding: 8px;
+      max-height: 100px;
+      overflow-y: auto;
+      line-height: 1.5;
+    }
+
+    .warning-box {
+      background: #660000;
+      border: 3px dashed #ff0000;
+      padding: 8px;
+      text-align: center;
+      font-size: 13px;
+      color: #ffcccc;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="banner">
+    <div class="bounce">🥚</div>
+    <h1><span class="rainbow">~*~ MY TAMAGOTCHI SHRINE!!! ~*~</span></h1>
+    <p style="font-size:14px; color:#00ffff;">
+      <span class="blink">★</span> home of <b style="color:#ff66cc;">Pochitchi</b>, the digital pet that owns my soul <span class="blink">★</span>
+    </p>
+    <p style="font-size:12px; color:#ff99cc;">Last fed: probably yesterday??? · Age: 47 Tamagotchi days</p>
+  </div>
+
+  <div class="marquee-wrap">
+    <div class="marquee-inner">
+      🥚 BEEP BEEP BEEP!!! FEED ME!!! 🥚 DO NOT RESET ME WHILE I AM SLEEPING!!! 🥚 I AM NOT A TOY I AM A LIFESTYLE!!! 🥚 MITTENS KNOCKED ME OFF THE DESK AGAIN!!! 🥚
+    </div>
+  </div>
+
+  <table class="layout">
+    <tr>
+      <td class="sidebar">
+        <h3>🥚 EGG MENU</h3>
+        <ul>
+          <li><a href="index.html">← Back 2 Home</a></li>
+          <li><a href="#device">My Tamagotchi</a></li>
+          <li><a href="#stats">Care Stats</a></li>
+          <li><a href="#evolution">Evolution Chart</a></li>
+          <li><a href="#tips">Care Tips</a></li>
+          <li><a href="pets.html">Mittens 🐱</a></li>
+          <li><a href="midi.html">MIDI Collection 🎵</a></li>
+          <li><a href="quiz.html">Personality Quiz 🔮</a></li>
+          <li><a href="secret.html">Secret Page 🔒</a></li>
+        </ul>
+
+        <hr class="fancy">
+
+        <h3>🎵 NOW PLAYING</h3>
+        <div class="midi-player">
+          <div>📼 tamagotchi_theme.mid</div>
+          <div style="margin:6px 0;">
+            <button onclick="alert('BEEP BEEP BEEP!!! (MIDI plugin required)')">▶ Play</button>
+            <button onclick="alert('...silence. Pochitchi is judging u.')">■ Stop</button>
+          </div>
+          <div>Volume: ██████░░░░</div>
+        </div>
+
+        <h3>⚠️ ALERT STATUS</h3>
+        <p style="font-size:11px; text-align:center; color:#ffccee;">
+          <span class="spin">🚨</span><br>
+          Current alert:<br>
+          <span id="sidebarAlert" class="blink">HUNGRY!!!</span>
+        </p>
+      </td>
+
+      <td class="main">
+        <div id="device" class="sparkle-box">
+          <h2 style="color:#ffff00; text-align:center; font-family:'Times New Roman',serif;">
+            🎮 MEET POCHITCHI!!! 🎮
+          </h2>
+          <p style="text-align:center; font-size:14px;">
+            I got this Tamagotchi 4 Christmas 1997 and I have NOT stopped checking on it since!!!
+            <span class="wobble">🥚</span> Mittens thinks it's a hockey puck. He is wrong.
+          </p>
+
+          <div class="tama-device" id="tamaDevice">
+            <div class="tama-keychain"></div>
+            <div class="lcd-screen">
+              <div class="lcd-pet" id="lcdPet"><span class="creature" id="creatureArt"></span></div>
+              <div class="poop-zone" id="poopZone"></div>
+              <div class="lcd-status" id="lcdStatus">HAPPY!!!</div>
+            </div>
+            <div class="tama-buttons">
+              <button class="tama-btn" title="Select" onclick="cycleMenu()">A</button>
+              <button class="tama-btn" title="Cancel" onclick="cancelAction()">B</button>
+              <button class="tama-btn" title="Confirm" onclick="confirmAction()">C</button>
+            </div>
+          </div>
+
+          <div class="care-panel">
+            <button class="care-btn feed" onclick="feedPet()">🍚 FEED</button>
+            <button class="care-btn play" onclick="playPet()">🎮 PLAY</button>
+            <button class="care-btn clean" onclick="cleanPet()">🧹 CLEAN</button>
+            <button class="care-btn discipline" onclick="disciplinePet()">📣 DISCIPLINE</button>
+          </div>
+
+          <p style="text-align:center; font-size:12px; color:#88ccff; margin-top:10px;">
+            Menu: <b id="menuLabel">Status</b> · Press C on the device or use the buttons above!!!
+          </p>
+        </div>
+
+        <div class="divider">🥚 · ･ ゜゜・。。・゜゜·。 · ･ 🥚</div>
+
+        <div id="stats">
+          <h3 style="color:#00ffff; text-align:center;">📊 CARE STATS 📊</h3>
+          <table class="stat-table">
+            <tr>
+              <td>Hunger</td>
+              <td><div class="meter"><div class="meter-fill hunger" id="hungerMeter" style="width:60%"></div></div></td>
+            </tr>
+            <tr>
+              <td>Happiness</td>
+              <td><div class="meter"><div class="meter-fill happy" id="happyMeter" style="width:75%"></div></div></td>
+            </tr>
+            <tr>
+              <td>Discipline</td>
+              <td><div class="meter"><div class="meter-fill discipline" id="disciplineMeter" style="width:40%"></div></div></td>
+            </tr>
+            <tr>
+              <td>Weight</td>
+              <td id="weightStat">12 lb · "a healthy snack size"</td>
+            </tr>
+            <tr>
+              <td>Stage</td>
+              <td id="stageStat">Teen · Pochitchi</td>
+            </tr>
+          </table>
+
+          <div class="warning-box" id="warningBox" style="display:none;">
+            <span class="blink">⚠️ BEEP BEEP BEEP!!!</span> Pochitchi needs attention RIGHT NOW!!!
+          </div>
+        </div>
+
+        <div class="divider">✧･ﾟ: *✧･ﾟ:* *:･ﾟ✧*:･ﾟ✧</div>
+
+        <div id="evolution" class="sparkle-box">
+          <h3 style="color:#ff66cc; text-align:center;">🌱 EVOLUTION CHART 🌱</h3>
+          <p style="font-size:13px; text-align:center;">If u take good care of ur pet it evolves!!! If u don't... well. Let's not talk about that.</p>
+          <div class="evolution-chart">
+            <div class="evo-stage" id="evoEgg">
+              <b>Egg</b>
+              <pre>  ___  
+ /   \ 
+ \___/ </pre>
+              <small>0-1 min</small>
+            </div>
+            <div class="evo-stage" id="evoBaby">
+              <b>Baby</b>
+              <pre> (o_o)
+  \_/ </pre>
+              <small>1-6 min</small>
+            </div>
+            <div class="evo-stage active" id="evoTeen">
+              <b>Teen</b>
+              <pre> (^_^)
+ /| |\ </pre>
+              <small>6-12 min</small>
+            </div>
+            <div class="evo-stage" id="evoAdult">
+              <b>Adult</b>
+              <pre> (◕‿◕)
+ /| |\
+  | | </pre>
+              <small>12+ min</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider">🥚 · ･ ゜゜・。。・゜゜·。 · ･ 🥚</div>
+
+        <div id="tips">
+          <h3 style="color:#ffff00;">📖 OFFICIAL CARE TIPS (by me) 📖</h3>
+          <ul style="font-size:14px; line-height:1.8;">
+            <li>Feed when hunger meter drops below 50% (or when it beeps at 3 AM)</li>
+            <li>Play when happiness drops — Pochitchi loves the guessing game!!!</li>
+            <li>Clean up poop IMMEDIATELY or ur pet gets sick (and so do u, emotionally)</li>
+            <li>Discipline when it calls 4 no reason — but not too much or it gets sad!!!</li>
+            <li>NEVER lend ur Tamagotchi 2 a friend. Jake reset mine in 6th grade. I am still not over it.</li>
+            <li>Mittens will try 2 bat it off the desk. This is why we can't have nice things.</li>
+          </ul>
+
+          <h4 style="color:#00ff99;">📟 Care Log</h4>
+          <div class="care-log" id="careLog">
+            > System boot... Pochitchi says hello!!!<br>
+            > Waiting 4 hooman input...
+          </div>
+        </div>
+
+        <div class="divider">★ · ･ ゜゜・。。・゜゜·。 · ･ ★</div>
+
+        <p style="text-align:center;">
+          <button onclick="resetPet()" style="background:#ff0000;color:#fff;border:3px outset #ff6666;font-weight:bold;cursor:pointer;padding:6px 16px;font-family:'Comic Sans MS',cursive;font-size:14px;">
+            🔄 RESET (DON'T U DARE) 🔄
+          </button>
+        </p>
+
+        <p style="text-align:center; margin-top:16px;">
+          <a class="home-btn" href="index.html">🏠 BACK 2 HOMEPAGE</a>
+          <a class="home-btn" href="pets.html">🐱 MITTENS</a>
+        </p>
+      </td>
+    </tr>
+  </table>
+
+  <div class="badge-row">
+    <span class="badge" style="background:#ff99cc;">Tamagotchi<br>Master '97</span>
+    <span class="badge" style="background:#ffcc00;">Best viewed<br>Netscape 4.0</span>
+    <span class="badge" style="background:#00ccff;">Digital Pet<br>Ring Member</span>
+    <span class="badge" style="background:#ff6699;">BEEP BEEP<br>BEEP!!!</span>
+    <span class="badge" style="background:#99ff99;">Never<br>Reset</span>
+  </div>
+
+  <footer>
+    <p>
+      © 1997 CyberDreamer99 &amp; Pochitchi. All Beeps Reserved.<br>
+      Hosted on <b style="color:#ff66cc;">GeoCities</b> — Neighborhood: <i>Area51/DimensionX/PetCorner</i><br>
+      <span style="font-size:9px;">No Tamagotchis were reset in the making of this page. (One was almost reset. Emotionally.)</span>
+    </p>
+    <p class="blink" style="color:#ff0099; font-size:14px;">🥚 THANKS 4 VISITING!!! PLZ FEED POCHITCHI BEFORE U LEAVE!!! 🥚</p>
+  </footer>
+
+</div>
+
+<script>
+  var stats = {
+    hunger: 60,
+    happy: 75,
+    discipline: 40,
+    weight: 12,
+    stage: 'teen',
+    poops: 0,
+    age: 47
+  };
+
+  var menus = ['Status', 'Feed', 'Play', 'Clean', 'Discipline', 'Lights'];
+  var menuIndex = 0;
+  var beeping = false;
+
+  var creatures = {
+    egg: '  ___  \n /   \\ \n \\___/ ',
+    baby: ' (o_o)\n  \\_/ ',
+    teen: ' (^_^)\n /| |\\ ',
+    adult: ' (◕‿◕)\n /| |\\\n  | | ',
+    sick: ' (x_x)\n  ... ',
+    sleeping: ' (-_-)\n  zzz '
+  };
+
+  var statusMessages = {
+    happy: ['HAPPY!!!', 'YAY!!!', 'LOVE U!!!', '^_^'],
+    hungry: ['HUNGRY!!!', 'FEED ME!!!', 'BEEP BEEP!!!'],
+    sad: ['SAD...', 'BOO HOO', ':(', 'LONELY...'],
+    sick: ['SICK!!!', 'HELP ME!!!', 'BLEH...'],
+    sleeping: ['ZZZ...', 'SHHH!!!', 'NAP TIME']
+  };
+
+  function log(msg) {
+    var el = document.getElementById('careLog');
+    el.innerHTML += '<br>> ' + msg;
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function updateMeters() {
+    document.getElementById('hungerMeter').style.width = stats.hunger + '%';
+    document.getElementById('happyMeter').style.width = stats.happy + '%';
+    document.getElementById('disciplineMeter').style.width = stats.discipline + '%';
+    document.getElementById('weightStat').textContent =
+      stats.weight + ' lb · "' + (stats.weight > 15 ? 'maybe skip a snack???' : stats.weight < 8 ? 'too skinny!!!' : 'a healthy snack size') + '"';
+  }
+
+  function updateCreature() {
+    var art = creatures[stats.stage] || creatures.teen;
+    if (stats.hunger < 25) art = creatures.sick;
+    document.getElementById('creatureArt').textContent = art;
+  }
+
+  function updateStatus() {
+    var msg;
+    if (stats.hunger < 30) msg = pick(statusMessages.hungry);
+    else if (stats.happy < 30) msg = pick(statusMessages.sad);
+    else if (stats.hunger < 25) msg = pick(statusMessages.sick);
+    else msg = pick(statusMessages.happy);
+
+    document.getElementById('lcdStatus').textContent = msg;
+    document.getElementById('sidebarAlert').textContent = msg;
+
+    var warn = stats.hunger < 35 || stats.happy < 35 || stats.poops > 2;
+    document.getElementById('warningBox').style.display = warn ? 'block' : 'none';
+
+    if (stats.hunger < 30 || stats.happy < 30) {
+      if (!beeping) startBeep();
+    } else {
+      stopBeep();
+    }
+  }
+
+  function pick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function startBeep() {
+    beeping = true;
+    document.getElementById('tamaDevice').classList.add('beeping');
+  }
+
+  function stopBeep() {
+    beeping = false;
+    document.getElementById('tamaDevice').classList.remove('beeping');
+  }
+
+  function renderPoops() {
+    var zone = document.getElementById('poopZone');
+    zone.innerHTML = '';
+    for (var i = 0; i < stats.poops; i++) {
+      zone.innerHTML += '<span class="poop">💩</span> ';
+    }
+  }
+
+  function feedPet() {
+    if (stats.hunger >= 95) {
+      log('Pochitchi is FULL. Stop feeding!!!');
+      alert('Pochitchi refuses more food. U are enabling it.');
+      return;
+    }
+    stats.hunger = Math.min(100, stats.hunger + 25);
+    stats.weight = Math.min(99, stats.weight + 1);
+    stats.happy = Math.min(100, stats.happy + 5);
+    log('Fed a meal!!! Hunger +' + 25 + '% · Weight now ' + stats.weight + ' lb');
+    updateAll();
+  }
+
+  function playPet() {
+    if (stats.hunger < 20) {
+      log('Too hungry 2 play!!! Feed first!!!');
+      alert('BEEP BEEP!!! Pochitchi is too hungry 2 play!!!');
+      return;
+    }
+    stats.happy = Math.min(100, stats.happy + 20);
+    stats.hunger = Math.max(0, stats.hunger - 10);
+    log('Played guessing game!!! Happiness +' + 20 + '%');
+    updateAll();
+  }
+
+  function cleanPet() {
+    if (stats.poops === 0) {
+      log('Nothing 2 clean. Room is spotless!!!');
+      return;
+    }
+    var cleaned = stats.poops;
+    stats.poops = 0;
+    stats.happy = Math.min(100, stats.happy + 10);
+    log('Cleaned ' + cleaned + ' poop(s)!!! Ew but necessary!!!');
+    renderPoops();
+    updateAll();
+  }
+
+  function disciplinePet() {
+    if (Math.random() > 0.5) {
+      stats.discipline = Math.min(100, stats.discipline + 15);
+      stats.happy = Math.max(0, stats.happy - 5);
+      log('Disciplined!!! Discipline +' + 15 + '% (Pochitchi pouted a little)');
+    } else {
+      stats.happy = Math.max(0, stats.happy - 10);
+      log('False alarm!!! Pochitchi was just saying hi. Now it is sad.');
+    }
+    updateAll();
+  }
+
+  function cycleMenu() {
+    menuIndex = (menuIndex + 1) % menus.length;
+    document.getElementById('menuLabel').textContent = menus[menuIndex];
+    log('Menu: ' + menus[menuIndex]);
+  }
+
+  function cancelAction() {
+    menuIndex = 0;
+    document.getElementById('menuLabel').textContent = menus[0];
+    log('Cancelled. Back 2 Status.');
+  }
+
+  function confirmAction() {
+    var action = menus[menuIndex].toLowerCase();
+    if (action === 'status') return;
+    if (action === 'feed') feedPet();
+    else if (action === 'play') playPet();
+    else if (action === 'clean') cleanPet();
+    else if (action === 'discipline') disciplinePet();
+    else if (action === 'lights') {
+      log('Lights off. Pochitchi is sleeping. SHHH!!!');
+      document.getElementById('creatureArt').textContent = creatures.sleeping;
+      document.getElementById('lcdStatus').textContent = 'ZZZ...';
+      stopBeep();
+      setTimeout(function () {
+        updateCreature();
+        updateStatus();
+        log('Good morning!!! Pochitchi woke up hungry (as usual).');
+        stats.hunger = Math.max(0, stats.hunger - 15);
+        updateAll();
+      }, 3000);
+    }
+  }
+
+  function resetPet() {
+    if (confirm('ARE U SURE??? This will erase Pochitchi FOREVER. Jake did this once. Never again.')) {
+      if (confirm('REALLY REALLY SURE??? Last chance!!!')) {
+        stats = { hunger: 80, happy: 80, discipline: 0, weight: 5, stage: 'egg', poops: 0, age: 0 };
+        document.getElementById('careLog').innerHTML = '> SYSTEM RESET... new egg appeared!!!';
+        document.getElementById('stageStat').textContent = 'Egg · ???';
+        setEvoStage('egg');
+        renderPoops();
+        updateAll();
+        alert('A new egg appeared. Treat it better this time.');
+      }
+    }
+  }
+
+  function setEvoStage(stage) {
+    ['egg', 'baby', 'teen', 'adult'].forEach(function (s) {
+      document.getElementById('evo' + s.charAt(0).toUpperCase() + s.slice(1)).classList.remove('active');
+    });
+    var el = document.getElementById('evo' + stage.charAt(0).toUpperCase() + stage.slice(1));
+    if (el) el.classList.add('active');
+  }
+
+  function maybeEvolve() {
+    if (stats.age >= 60 && stats.stage !== 'adult') {
+      stats.stage = 'adult';
+      setEvoStage('adult');
+      document.getElementById('stageStat').textContent = 'Adult · Mametchi (probably)';
+      log('EVOLUTION!!! Pochitchi evolved into an ADULT!!! 🎉');
+      alert('🎉 POCHITCHI EVOLVED!!! 🎉 U are the best Tamagotchi parent on GeoCities!!!');
+    } else if (stats.age >= 30 && stats.stage === 'baby') {
+      stats.stage = 'teen';
+      setEvoStage('teen');
+      document.getElementById('stageStat').textContent = 'Teen · Pochitchi';
+      log('Evolved into a TEEN!!! So angsty.');
+    } else if (stats.age >= 10 && stats.stage === 'egg') {
+      stats.stage = 'baby';
+      setEvoStage('baby');
+      document.getElementById('stageStat').textContent = 'Baby · Babytchi';
+      log('Egg hatched!!! It is a BABY!!!');
+    }
+  }
+
+  function updateAll() {
+    updateMeters();
+    updateCreature();
+    updateStatus();
+  }
+
+  // Passive decay — the authentic Tamagotchi experience
+  setInterval(function () {
+    stats.hunger = Math.max(0, stats.hunger - 2);
+    stats.happy = Math.max(0, stats.happy - 1);
+    stats.age++;
+
+    if (Math.random() < 0.08 && stats.poops < 4) {
+      stats.poops++;
+      renderPoops();
+      log('Pochitchi made a poop. Clean it!!!');
+    }
+
+    maybeEvolve();
+    updateAll();
+  }, 5000);
+
+  // Init
+  updateCreature();
+  updateAll();
+  renderPoops();
+</script>
+
+</body>
+</html>

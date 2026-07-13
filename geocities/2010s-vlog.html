@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberDreamer99 :: Vlog Channel</title>
+  <style>
+    @keyframes shimmer-bar {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    @keyframes pulse-sub {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 14px rgba(204,0,0,0.35); }
+      50% { transform: scale(1.04); box-shadow: 0 6px 22px rgba(204,0,0,0.5); }
+    }
+    @keyframes view-tick {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.55; }
+    }
+    @keyframes live-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #0f0f0f;
+      background: #f9f9f9;
+    }
+
+    a { color: #065fd4; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #fff;
+      border-bottom: 1px solid #e5e5e5;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .topbar-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 16px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      color: #0f0f0f;
+      font-size: 18px;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 22px;
+      border-radius: 6px;
+      background: #ff0000;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 11px;
+    }
+
+    .search {
+      flex: 1;
+      max-width: 560px;
+      display: flex;
+      border: 1px solid #ccc;
+      border-radius: 24px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .search input {
+      flex: 1;
+      border: 0;
+      padding: 10px 16px;
+      font: inherit;
+      outline: none;
+    }
+
+    .search button {
+      border: 0;
+      background: #f8f8f8;
+      border-left: 1px solid #ccc;
+      padding: 0 18px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .nav a { color: #606060; }
+    .nav a.active {
+      color: #fff;
+      background: #282828;
+      border-radius: 999px;
+      padding: 6px 12px;
+      text-decoration: none;
+    }
+
+    .channel-banner {
+      height: 180px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.08), transparent),
+        linear-gradient(90deg, #ff0000, #ff4500, #ffcc00, #8338ec, #3a86ff);
+      background-size: 200% 100%;
+      animation: shimmer-bar 12s linear infinite;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: clamp(28px, 6vw, 52px);
+      font-weight: 900;
+      letter-spacing: -1px;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+    }
+
+    .channel-header {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 20px;
+      border-bottom: 1px solid #e5e5e5;
+      background: #fff;
+    }
+
+    .channel-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .channel-info h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .channel-meta {
+      color: #606060;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .sub-btn {
+      margin-left: auto;
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 18px;
+      background: #cc0000;
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      animation: pulse-sub 2.5s ease-in-out infinite;
+    }
+
+    .sub-btn.subscribed {
+      background: #606060;
+      animation: none;
+    }
+
+    .layout {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 24px;
+      border-bottom: 1px solid #e5e5e5;
+      margin-bottom: 20px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .tabs span {
+      padding-bottom: 12px;
+      border-bottom: 2px solid #0f0f0f;
+      color: #0f0f0f;
+    }
+
+    .tabs a {
+      padding-bottom: 12px;
+      color: #606060;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .video-card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #e5e5e5;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      cursor: pointer;
+    }
+
+    .video-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .thumb {
+      aspect-ratio: 16 / 9;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 900;
+      font-size: 22px;
+      text-align: center;
+      line-height: 1.2;
+      position: relative;
+      padding: 12px;
+    }
+
+    .duration {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      background: rgba(0,0,0,0.82);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .video-body {
+      padding: 12px;
+    }
+
+    .video-title {
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 1.35;
+      margin-bottom: 6px;
+      color: #0f0f0f;
+    }
+
+    .video-stats {
+      font-size: 12px;
+      color: #606060;
+    }
+
+    .featured {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .featured-player {
+      aspect-ratio: 16 / 9;
+      background:
+        linear-gradient(135deg, rgba(0,0,0,0.15), transparent),
+        linear-gradient(135deg, #111, #333 40%, #cc0000);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: clamp(32px, 6vw, 56px);
+      position: relative;
+    }
+
+    .play-btn {
+      width: 72px;
+      height: 52px;
+      background: rgba(255,0,0,0.92);
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .featured-body {
+      padding: 16px 18px 18px;
+    }
+
+    .featured-body h2 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .featured-body p {
+      margin: 0;
+      color: #606060;
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .sidebar-card {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .sidebar-card h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #cc0000;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .live-badge::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #fff;
+      animation: live-dot 1s ease-in-out infinite;
+    }
+
+    .playlist-item {
+      display: flex;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 13px;
+    }
+
+    .playlist-item:last-child { border-bottom: none; }
+
+    .mini-thumb {
+      width: 72px;
+      height: 40px;
+      border-radius: 6px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .comment {
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .comment:last-child { border-bottom: none; }
+
+    .comment b { color: #0f0f0f; }
+
+    .upload-cta {
+      display: block;
+      text-align: center;
+      padding: 12px;
+      border-radius: 10px;
+      background: #282828;
+      color: #fff !important;
+      font-weight: 700;
+      text-decoration: none !important;
+    }
+
+    .upload-cta:hover { background: #0f0f0f; }
+
+    .view-counter {
+      font-variant-numeric: tabular-nums;
+      animation: view-tick 3s ease-in-out infinite;
+    }
+
+    footer {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 16px 32px;
+      color: #909090;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 960px) {
+      .layout { grid-template-columns: 1fr; }
+      .search { display: none; }
+      .sub-btn { margin-left: 0; width: 100%; }
+      .channel-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="2010s-vlog.html">
+      <span class="brand-icon">▶</span>
+      <span>DreamTube</span>
+    </a>
+    <form class="search" onsubmit="searchVideos(event)">
+      <input type="search" placeholder="Search CyberDreamer99 vlogs..." aria-label="Search">
+      <button type="submit">🔍</button>
+    </form>
+    <nav class="nav" aria-label="Site eras">
+      <a href="index.html">90s Home</a>
+      <a href="web2.html">Web 2.0</a>
+      <a href="2010s.html">2010s Feed</a>
+      <a class="active" href="2010s-vlog.html">Vlog Channel</a>
+      <a href="2020s.html">Today</a>
+      <a href="2030s.html">Agent Era →</a>
+      <a href="pets.html">Mittens</a>
+    </nav>
+  </div>
+</header>
+
+<div class="channel-banner">FROM DIAL-UP TO 4G</div>
+
+<div class="channel-header">
+  <div class="channel-avatar">CD</div>
+  <div class="channel-info">
+    <h1>CyberDreamer99</h1>
+    <div class="channel-meta">
+      <span id="sub-count">847K</span> subscribers ·
+      <span id="view-count" class="view-counter">12,847,293</span> views ·
+      47 videos · joined 2011
+    </div>
+    <p style="margin:8px 0 0; font-size:13px; color:#606060; max-width:640px;">
+      weekly vlogs about surviving the internet. guestbooks, glitter GIFs, glossy buttons,
+      and now 1080p thumbnails. new upload every Throwback Thursday.
+    </p>
+  </div>
+  <button class="sub-btn" id="sub-btn" onclick="toggleSubscribe()">Subscribe</button>
+</div>
+
+<main class="layout">
+  <section>
+    <div class="tabs">
+      <span>Videos</span>
+      <a href="#">Playlists</a>
+      <a href="#">Community</a>
+      <a href="2010s.html">Social Feed</a>
+    </div>
+
+    <article class="featured" onclick="playFeatured()">
+      <div class="featured-player">
+        <div class="play-btn">▶</div>
+      </div>
+      <div class="featured-body">
+        <h2>I READ MY OLD GEOCITIES GUESTBOOK (CRINGE) 😱</h2>
+        <p>
+          <span id="featured-views">2.1M</span> views · 3 days ago ·
+          i opened my 1997 guestbook entries on camera and immediately regretted everything.
+          xX_DarkAngel_Xx was right about the MIDI player though.
+        </p>
+      </div>
+    </article>
+
+    <div class="video-grid" id="video-grid">
+      <article class="video-card" onclick="playVideo('MITTENS REACTS TO TUNA')">
+        <div class="thumb" style="background:linear-gradient(135deg,#ff9a9e,#fad0c4);">
+          🐱 MITTENS
+          <span class="duration">4:20</span>
+        </div>
+        <div class="video-body">
+          <div class="video-title">MITTENS REACTS TO TUNA (GONE WRONG)</div>
+          <div class="video-stats">891K views · 1 week ago</div>
+        </div>
+      </article>
+
+      <article class="video-card" onclick="playVideo('UNBOXING MY FIRST SMARTPHONE')">
+        <div class="thumb" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+          📱 UNBOX
+          <span class="duration">8:47</span>
+        </div>
+        <div class="video-body">
+          <div class="video-title">UNBOXING MY FIRST SMARTPHONE (GeoCities Still Works???)</div>
+          <div class="video-stats">1.3M views · 2 weeks ago</div>
+        </div>
+      </article>
+
+      <article class="video-card" onclick="playVideo('WEB 2.0 PROFILE ROAST')">
+        <div class="thumb" style="background:linear-gradient(135deg,#4a90d9,#2b6cb0);">
+          WEB 2.0
+          <span class="duration">12:04</span>
+        </div>
+        <div class="video-body">
+          <div class="video-title">REACTING TO MY WEB 2.0 PROFILE (AJAX WAS A PHASE)</div>
+          <div class="video-stats">654K views · 3 weeks ago</div>
+        </div>
+      </article>
+
+      <article class="video-card" onclick="playVideo('GRADIENT TUTORIAL')">
+        <div class="thumb" style="background:linear-gradient(135deg,#fcb045,#fd1d1d,#833ab4);">
+          GRADIENT
+          <span class="duration">6:66</span>
+        </div>
+        <div class="video-body">
+          <div class="video-title">HOW TO MAKE A GRADIENT (TUTORIAL) #nofilter</div>
+          <div class="video-stats">420K views · 1 month ago</div>
+        </div>
+      </article>
+
+      <article class="video-card" onclick="playVideo('TOP 8 FRIENDS DRAMA')">
+        <div class="thumb" style="background:linear-gradient(135deg,#ff0050,#8338ec);">
+          TOP 8
+          <span class="duration">15:37</span>
+        </div>
+        <div class="video-body">
+          <div class="video-title">WHY I GOT REMOVED FROM SOMEONE'S TOP 8</div>
+          <div class="video-stats">2.8M views · 2 months ago</div>
+        </div>
+      </article>
+
+      <article class="video-card" onclick="playVideo('DIAL UP ASMR')">
+        <div class="thumb" style="background:linear-gradient(135deg,#111,#444);">
+          📞 ASMR
+          <span class="duration">3:33</span>
+        </div>
+        <div class="video-body">
+          <div class="video-title">DIAL-UP CONNECTION SOUNDS (ASMR) [NO TALKING]</div>
+          <div class="video-stats">133K views · 4 months ago</div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <aside>
+    <section class="sidebar-card">
+      <div class="live-badge">LIVE NOW</div>
+      <b>Q&amp;A: Ask Me About My Under Construction GIF</b>
+      <p style="font-size:13px; color:#606060; margin:8px 0 0;">
+        847 watching · started 23 minutes ago
+      </p>
+      <a class="upload-cta" href="#" style="margin-top:12px;" onclick="alert('Stream buffering... still faster than dial-up.'); return false;">Join Stream</a>
+    </section>
+
+    <section class="sidebar-card">
+      <h3>Popular Playlists</h3>
+      <div class="playlist-item">
+        <div class="mini-thumb" style="background:#cc0000;">📼</div>
+        <div>
+          <b>GeoCities Archives</b><br>
+          <small style="color:#909090;">12 videos</small>
+        </div>
+      </div>
+      <div class="playlist-item">
+        <div class="mini-thumb" style="background:#8338ec;">🎨</div>
+        <div>
+          <b>Filter Tutorials</b><br>
+          <small style="color:#909090;">8 videos</small>
+        </div>
+      </div>
+      <div class="playlist-item">
+        <div class="mini-thumb" style="background:#1db954;">🎵</div>
+        <div>
+          <b>Mittens Collabs</b><br>
+          <small style="color:#909090;">6 videos · <a href="pets.html">visit cat page</a></small>
+        </div>
+      </div>
+    </section>
+
+    <section class="sidebar-card">
+      <h3>Top Comments</h3>
+      <div class="comment">
+        <b>xX_DarkAngel_Xx</b> · 2 days ago<br>
+        first!!! also your guestbook entry from 1999 still haunts me
+      </div>
+      <div class="comment">
+        <b>sk8er_boi_2005</b> · 3 days ago<br>
+        can you react to your <a href="web2.html">web 2.0 page</a> next pls
+      </div>
+      <div class="comment">
+        <b>Mittens</b> · 4 days ago<br>
+        *demands more tuna sponsorship*
+      </div>
+    </section>
+
+    <section class="sidebar-card">
+      <h3>Creator Dashboard</h3>
+      <p style="font-size:13px; color:#606060; margin:0 0 12px;">
+        Analytics say your audience loves nostalgia and cats. shocking.
+      </p>
+      <a class="upload-cta" href="#" onclick="uploadVideo(); return false;">+ Upload Video</a>
+    </section>
+  </aside>
+</main>
+
+<footer>
+  <p>
+    © 2011–2016 CyberDreamer99 on DreamTube. Not affiliated with any real video platform.<br>
+    Best viewed at 1080p with annotations enabled (RIP). <a href="index.html">Return to 90s homepage</a>
+  </p>
+</footer>
+
+<script>
+  var subscribed = false;
+  var subs = 847000;
+  var totalViews = 12847293;
+
+  function toggleSubscribe() {
+    subscribed = !subscribed;
+    var btn = document.getElementById("sub-btn");
+    var count = document.getElementById("sub-count");
+    if (subscribed) {
+      subs++;
+      btn.textContent = "Subscribed ✓";
+      btn.classList.add("subscribed");
+      count.textContent = formatSubs(subs);
+      alert("Subscribed! Bell notifications ON. Your feed is now 40% GeoCities throwbacks.");
+    } else {
+      subs--;
+      btn.textContent = "Subscribe";
+      btn.classList.remove("subscribed");
+      count.textContent = formatSubs(subs);
+    }
+  }
+
+  function formatSubs(n) {
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + "M";
+    if (n >= 1000) return Math.round(n / 1000) + "K";
+    return String(n);
+  }
+
+  function playFeatured() {
+    totalViews++;
+    document.getElementById("view-count").textContent = totalViews.toLocaleString();
+    alert("Now playing: I READ MY OLD GEOCITIES GUESTBOOK (CRINGE) 😱\n\nPre-roll ad: Candy Crush Saga (30 sec, unskippable)");
+  }
+
+  function playVideo(title) {
+    totalViews += Math.floor(Math.random() * 900) + 100;
+    document.getElementById("view-count").textContent = totalViews.toLocaleString();
+    alert("Now playing: " + title + "\n\nBuffering... ████░░░░░░ 42%");
+  }
+
+  function searchVideos(event) {
+    event.preventDefault();
+    var query = event.target.querySelector("input").value.trim();
+    alert(query
+      ? "Showing results for: " + query + "\n\n0 exact matches. Here are 47 videos about GeoCities instead."
+      : "Try searching: guestbook, mittens, dial-up, cringe");
+  }
+
+  function uploadVideo() {
+    alert("Upload queued!\n\nTitle: MY NEW VLOG\nPrivacy: Public\nMonetization: Disabled (copyright claim on MIDI player)");
+  }
+</script>
+
+</body>
+</html>

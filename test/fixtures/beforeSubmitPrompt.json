@@ -1,0 +1,7 @@
+{
+  "hook_event_name": "beforeSubmitPrompt",
+  "conversation_id": "test-conv-0001",
+  "generation_id": "gen-0001",
+  "model": "claude-4.5-sonnet",
+  "prompt": "refactor the widget"
+}

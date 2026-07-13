@@ -1,0 +1,7 @@
+{
+  "hook_event_name": "stop",
+  "conversation_id": "test-conv-0002",
+  "generation_id": "gen-0002",
+  "model": "gpt-5",
+  "status": "error"
+}

@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>~*~ CYBERDREAMER99'S NEON MALL ARCADE FOOD COURT!!! ~*~</title>
+  <style>
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    @keyframes rainbow {
+      0% { color: #ff0000; }
+      16% { color: #ff9900; }
+      33% { color: #ffff00; }
+      50% { color: #00ff99; }
+      66% { color: #00ccff; }
+      83% { color: #cc66ff; }
+      100% { color: #ff0000; }
+    }
+    @keyframes marquee {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 4px #ff00ff, 0 0 10px #00ffff; }
+      50% { text-shadow: 0 0 14px #ffff00, 0 0 28px #ff00ff, 0 0 36px #00ffff; }
+    }
+    @keyframes tile-scroll {
+      0% { background-position: 0 0; }
+      100% { background-position: 80px 80px; }
+    }
+    @keyframes escalator {
+      0% { background-position: 0 0; }
+      100% { background-position: 60px 0; }
+    }
+    @keyframes crawl {
+      0% { left: -120px; }
+      100% { left: calc(100% + 120px); }
+    }
+    @keyframes coin {
+      0% { transform: translateY(0) rotateY(0deg); }
+      50% { transform: translateY(-12px) rotateY(180deg); }
+      100% { transform: translateY(0) rotateY(360deg); }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #120018;
+      background-image:
+        linear-gradient(45deg, rgba(255,0,255,0.18) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(0,255,255,0.18) 25%, transparent 25%),
+        radial-gradient(circle at 20% 30%, #ffff00 1px, transparent 1px),
+        radial-gradient(circle at 70% 80%, #ff66cc 1px, transparent 1px);
+      background-size: 40px 40px, 40px 40px, 92px 92px, 76px 76px;
+      animation: tile-scroll 18s linear infinite;
+      font-family: "Comic Sans MS", "Chalkboard SE", cursive, sans-serif;
+      color: #ffccff;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext y='24' font-size='24'%3E%F0%9F%9B%8D%EF%B8%8F%3C/text%3E%3C/svg%3E"), auto;
+    }
+
+    a { color: #ffff00; }
+    a:visited { color: #00ffff; }
+    a:hover {
+      color: #000;
+      background: #ff00ff;
+      text-decoration: blink;
+    }
+
+    .blink { animation: blink 0.9s step-start infinite; }
+    .rainbow { animation: rainbow 2s linear infinite; }
+    .spin { display: inline-block; animation: spin 2.5s linear infinite; }
+    .bounce { display: inline-block; animation: bounce 0.7s ease-in-out infinite; }
+    .glow { animation: glow 1.8s ease-in-out infinite; }
+    .coin { display: inline-block; animation: coin 1.2s ease-in-out infinite; }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+
+    .mall-topper {
+      position: relative;
+      height: 74px;
+      overflow: hidden;
+      border: 4px ridge #ffcc00;
+      background:
+        repeating-linear-gradient(90deg, #202020, #202020 18px, #333 18px, #333 36px),
+        linear-gradient(180deg, #000, #330044);
+      margin-bottom: 10px;
+    }
+
+    .mall-cop {
+      position: absolute;
+      top: 12px;
+      font-size: 36px;
+      animation: crawl 8s linear infinite;
+    }
+
+    .escalator {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 18px;
+      background: repeating-linear-gradient(
+        90deg,
+        #c0c0c0,
+        #c0c0c0 8px,
+        #777 8px,
+        #777 16px
+      );
+      animation: escalator 1s linear infinite;
+    }
+
+    .banner {
+      text-align: center;
+      background: #000;
+      border: 6px double #00ffff;
+      box-shadow: 0 0 18px #ff00ff;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .banner h1 {
+      font-size: 34px;
+      margin: 5px 0;
+      font-family: "Times New Roman", serif;
+      text-shadow: 3px 3px 0 #ff00ff, -2px -2px 0 #00ffff;
+    }
+
+    .construction {
+      background: repeating-linear-gradient(
+        -45deg,
+        #ffcc00,
+        #ffcc00 10px,
+        #000 10px,
+        #000 20px
+      );
+      background-size: 40px 40px;
+      border: 3px solid #000;
+      padding: 8px;
+      text-align: center;
+      font-weight: bold;
+      color: #000;
+      font-size: 18px;
+      margin: 10px 0;
+    }
+
+    .marquee-wrap {
+      overflow: hidden;
+      background: linear-gradient(90deg, #ff00ff, #00ffff, #ffff00, #ff00ff);
+      border: 3px ridge #ffffff;
+      padding: 4px 0;
+      margin: 8px 0;
+    }
+
+    .marquee-inner {
+      white-space: nowrap;
+      display: inline-block;
+      animation: marquee 13s linear infinite;
+      font-weight: bold;
+      font-size: 18px;
+      color: #000;
+      text-shadow: 1px 1px 0 #fff;
+    }
+
+    table.layout {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 8px;
+    }
+
+    .sidebar {
+      width: 195px;
+      vertical-align: top;
+      background: #330033;
+      border: 4px outset #ff66ff;
+      padding: 8px;
+    }
+
+    .sidebar h3 {
+      text-align: center;
+      color: #ffff00;
+      font-size: 14px;
+      margin: 0 0 8px;
+      border-bottom: 2px dotted #00ffff;
+      padding-bottom: 4px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar li {
+      margin: 6px 0;
+      font-size: 13px;
+    }
+
+    .sidebar li::before {
+      content: "🛍️ ";
+    }
+
+    .main {
+      vertical-align: top;
+      background: #001144;
+      border: 4px inset #00ccff;
+      padding: 12px;
+    }
+
+    .sparkle-box {
+      border: 4px double #ff00ff;
+      background: #1a0033;
+      padding: 10px;
+      margin: 8px 0;
+    }
+
+    .divider {
+      text-align: center;
+      font-size: 20px;
+      color: #ffff00;
+      margin: 12px 0;
+      letter-spacing: 4px;
+    }
+
+    .midi-player {
+      background: #c0c0c0;
+      border: 3px outset #fff;
+      padding: 8px;
+      margin: 10px 0;
+      color: #000;
+      font-family: "MS Sans Serif", Tahoma, sans-serif;
+      font-size: 12px;
+    }
+
+    .midi-player button {
+      background: #c0c0c0;
+      border: 2px outset #fff;
+      font-size: 11px;
+      padding: 2px 8px;
+      cursor: pointer;
+    }
+
+    .counter {
+      font-family: "Courier New", monospace;
+      background: #000;
+      color: #00ffff;
+      border: 2px inset #666;
+      padding: 4px 8px;
+      display: inline-block;
+      font-size: 20px;
+      letter-spacing: 3px;
+    }
+
+    .terminal {
+      background: #000;
+      border: 3px inset #555;
+      color: #00ff00;
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+      padding: 8px;
+      line-height: 1.5;
+    }
+
+    .store-map {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .store {
+      min-height: 88px;
+      border: 3px outset #cc99ff;
+      background: linear-gradient(135deg, #330066, #001144);
+      padding: 8px;
+      text-align: center;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .store:hover {
+      background: linear-gradient(135deg, #ff00ff, #00ffff);
+      color: #000;
+    }
+
+    .store b {
+      display: block;
+      color: #ffff00;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .food-court {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .food-court th,
+    .food-court td {
+      border: 1px solid #ff00ff;
+      padding: 5px;
+    }
+
+    .food-court th {
+      background: #330033;
+      color: #ffff00;
+    }
+
+    .arcade-cabinet {
+      max-width: 320px;
+      margin: 0 auto;
+      background: linear-gradient(180deg, #ff00ff, #660066);
+      border: 6px ridge #ff99ff;
+      border-radius: 16px 16px 6px 6px;
+      padding: 12px;
+      box-shadow: 0 8px 0 #220022;
+    }
+
+    .screen {
+      background: #000;
+      border: 4px inset #333;
+      min-height: 128px;
+      color: #00ff00;
+      font-family: "Courier New", monospace;
+      padding: 10px;
+      text-align: center;
+      white-space: pre-line;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .arcade-buttons {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .arcade-btn,
+    .home-btn {
+      display: inline-block;
+      background: linear-gradient(180deg, #ffff00, #ff9900);
+      border: 3px outset #ffcc00;
+      padding: 7px 14px;
+      font-weight: bold;
+      color: #000066;
+      text-decoration: none;
+      font-size: 14px;
+      margin: 4px;
+      cursor: pointer;
+      font-family: "Comic Sans MS", cursive;
+    }
+
+    .arcade-btn:active,
+    .home-btn:active {
+      border-style: inset;
+    }
+
+    .claw {
+      background: #002244;
+      border: 4px ridge #00ffff;
+      padding: 10px;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    .prize-case {
+      min-height: 76px;
+      background: linear-gradient(180deg, rgba(0,255,255,0.18), rgba(255,0,255,0.22));
+      border: 3px inset #99ffff;
+      padding: 12px;
+      font-size: 26px;
+    }
+
+    .receipt {
+      background: #fff7cc;
+      color: #111;
+      border: 3px dashed #cc9900;
+      padding: 10px;
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+      margin: 10px auto;
+      max-width: 260px;
+      text-align: left;
+    }
+
+    .badge-row {
+      text-align: center;
+      margin: 15px 0;
+    }
+
+    .badge {
+      display: inline-block;
+      border: 2px outset #ccc;
+      background: #c0c0c0;
+      padding: 4px 8px;
+      margin: 4px;
+      font-size: 10px;
+      font-family: Arial, sans-serif;
+      color: #000;
+    }
+
+    .new-tag {
+      background: #ff0000;
+      color: #ffff00;
+      font-size: 10px;
+      padding: 1px 4px;
+      font-weight: bold;
+      animation: blink 0.8s step-start infinite;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 11px;
+      color: #bb88cc;
+      margin-top: 20px;
+      font-family: "Times New Roman", serif;
+    }
+
+    hr.fancy {
+      border: none;
+      height: 20px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20'%3E%3Ctext x='2' y='16' font-size='16'%3E%F0%9F%9B%8D%EF%B8%8F%3C/text%3E%3C/svg%3E") repeat-x center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="mall-topper">
+    <div class="mall-cop">👮‍♂️🛴</div>
+    <div class="escalator"></div>
+  </div>
+
+  <div class="banner">
+    <div class="bounce">🛍️</div>
+    <h1><span class="rainbow">~*~ NEON MALL ARCADE FOOD COURT ~*~</span></h1>
+    <p style="font-size:14px; color:#00ffff;">
+      <span class="blink">★</span>
+      You are shopper #<span class="counter" id="counter">000,000</span>
+      <span class="blink">★</span>
+    </p>
+    <p style="font-size:12px; color:#ff99ff;">Last Updated: Saturday @ 2:17 PM, right after Claire's</p>
+  </div>
+
+  <div class="construction">
+    🚧 ESCALATOR TEMPORARILY HAUNTED 🚧 &nbsp; PLEASE USE GLITTER STAIRS!!! &nbsp; 🚧
+  </div>
+
+  <div class="marquee-wrap">
+    <div class="marquee-inner">
+      🛍️彡 WELCOME 2 THE MALL!!! 彡🕹️ FREE ORANGE JULIUS SAMPLE @ 3PM 彡🍕 THE ARCADE TOKEN MACHINE ACCEPTS EXACTLY ONE HAUNTED QUARTER 彡💿 CD SAMPLER SOLD OUT 彡🛍️
+    </div>
+  </div>
+
+  <table class="layout">
+    <tr>
+      <td class="sidebar">
+        <h3>🛍️ MALL DIRECTORY</h3>
+        <ul>
+          <li><a href="index.html">← Back 2 Home</a></li>
+          <li><a href="#directory">Store Directory</a> <span class="new-tag">NEW!</span></li>
+          <li><a href="#arcade">Arcade Cabinet</a> <span class="new-tag">HOT!</span></li>
+          <li><a href="#food">Food Court</a></li>
+          <li><a href="#claw">Claw Machine</a></li>
+          <li><a href="#receipt">Receipt Generator</a></li>
+          <li><a href="midi.html">MIDI Collection 🎵</a></li>
+          <li><a href="quiz.html">Personality Quiz 🔮</a></li>
+          <li><a href="aliens.html">UFO Zone 🛸</a></li>
+          <li><a href="secret.html">Secret Page 🔒</a></li>
+        </ul>
+
+        <hr class="fancy">
+
+        <h3>🎵 NOW PLAYING</h3>
+        <div class="midi-player">
+          <div>📼 smooth_jazz_mall.mid</div>
+          <div style="margin:6px 0;">
+            <button onclick="alert('MIDI starts playing from EVERY store speaker at once!!!')">▶ Play</button>
+            <button onclick="alert('Mall silence is impossible. The fountain continues.')">■ Stop</button>
+          </div>
+          <div>Volume: ███████░░░</div>
+        </div>
+
+        <h3>🚨 SECURITY ALERT</h3>
+        <div class="terminal" style="text-align:center;">
+          <div id="alertLevel" class="blink">NO RUNNING</div>
+          <div style="margin-top:4px;">👮‍♂️ watching u</div>
+        </div>
+      </td>
+
+      <td class="main">
+        <div class="sparkle-box">
+          <h2 class="glow" style="color:#ffff00; text-align:center; font-family:'Times New Roman',serif;">
+            🛍️ MEET ME BY THE FOUNTAIN!!! 🛍️
+          </h2>
+          <p>
+            Welcome 2 my extremely accurate tribute 2 the local mall, where the carpet smells like
+            pretzels, every store has a lava lamp, and the arcade carpet is probably sentient.
+          </p>
+          <p>
+            Current mood: <b style="color:#00ffff;">waiting 4 my mom 2 pick me up</b> ·
+            Budget: <span class="coin">🪙</span> <b>$7.43</b> ·
+            Mission: <span class="blink">win an impossible plushie!!!</span>
+          </p>
+        </div>
+
+        <div class="divider">🛍️ · ･ ゜゜・。。・゜゜·。 · 🛍️</div>
+
+        <div id="directory">
+          <h3 style="color:#00ffff; text-align:center;">📍 INTERACTIVE STORE DIRECTORY 📍</h3>
+          <p style="font-size:13px; text-align:center;">Click a store 2 receive a VERY official mall announcement!!!</p>
+          <div class="store-map">
+            <div class="store" onclick="visitStore('Spencer Gifts', 'The blacklight poster chooses YOU.')"><b>Spencer Gifts</b>fog machine aisle</div>
+            <div class="store" onclick="visitStore('Suncoast Video', 'A VHS copy of The Matrix is glowing.')"><b>Suncoast Video</b>trailers on loop</div>
+            <div class="store" onclick="visitStore('Sam Goody', 'Listening station headphones contain ancient mall wisdom.')"><b>Sam Goody</b>CD singles!!!</div>
+            <div class="store" onclick="visitStore('Claires', 'You now own 47 butterfly clips emotionally.')"><b>Claire's</b>earrings + glitter</div>
+            <div class="store" onclick="visitStore('Babbages', 'A strategy guide whispers cheat codes.')"><b>Babbage's</b>game demo kiosk</div>
+            <div class="store" onclick="visitStore('Fountain', 'Someone threw in a Canadian penny. Luck increased.')"><b>Fountain</b>meeting spot</div>
+          </div>
+          <div class="terminal" id="directoryOut">&gt; select a store...</div>
+        </div>
+
+        <div class="divider">🕹️ ✧･ﾟ: *✧･ﾟ:* 🕹️ *:･ﾟ✧*:･ﾟ✧</div>
+
+        <div id="arcade" class="sparkle-box">
+          <h3 style="color:#ffff00; text-align:center;">🕹️ ARCADE CABINET: MALL QUEST 1999 🕹️</h3>
+          <div class="arcade-cabinet">
+            <div class="screen" id="gameScreen">INSERT TOKEN
+
+HIGH SCORE: CDR 999999
+PRESS START 2 SAVE THE FOOD COURT</div>
+            <div class="arcade-buttons">
+              <button class="arcade-btn" onclick="startGame()">START</button>
+              <button class="arcade-btn" onclick="jumpGame()">JUMP</button>
+              <button class="arcade-btn" onclick="zapGame()">ZAP</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider">🍕 · ･ ゜゜・。。・゜゜·。 · 🍟</div>
+
+        <div id="food">
+          <h3 style="color:#ffcc00;">🍕 FOOD COURT POWER RANKINGS 🍕</h3>
+          <table class="food-court">
+            <tr><th>Kiosk</th><th>Best Item</th><th>Aura</th></tr>
+            <tr><td>Sbarro-adjacent Pizza Realm</td><td>Triangle slice bigger than ur face</td><td>★★★★★</td></tr>
+            <tr><td>Orange Julius Nebula</td><td>Frothy mystery citrus</td><td>★★★★☆</td></tr>
+            <tr><td>Pretzel Planet</td><td>Cinnamon sugar orbit</td><td>★★★★★</td></tr>
+            <tr><td>Wok This Way</td><td>Free toothpick sample</td><td>★★★☆☆</td></tr>
+          </table>
+          <p style="text-align:center;">
+            <button class="arcade-btn" onclick="foodOracle()">🍕 ASK THE FOOD COURT ORACLE 🍕</button>
+          </p>
+          <div class="terminal" id="foodOracle">&gt; oracle is reheating...</div>
+        </div>
+
+        <div class="divider">🧸 ✧･ﾟ: *✧･ﾟ:* 🧸 *:･ﾟ✧*:･ﾟ✧</div>
+
+        <div id="claw" class="claw">
+          <h3 style="color:#00ffff; margin-top:0;">🧸 TOTALLY FAIR CLAW MACHINE 🧸</h3>
+          <div class="prize-case" id="prizeCase">🧸 🐸 🐱 🦄 💿 🛸</div>
+          <p style="font-size:13px;">Cost: 2 tokens · Success rate: <span class="blink">legally unclear</span></p>
+          <button class="arcade-btn" onclick="playClaw()">DROP CLAW!!!</button>
+          <div class="terminal" id="clawOut" style="margin-top:8px;">&gt; claw is suspiciously loose...</div>
+        </div>
+
+        <div class="divider">🧾 · ･ ゜゜・。。・゜゜·。 · 🧾</div>
+
+        <div id="receipt" class="sparkle-box">
+          <h3 style="color:#ffff00; text-align:center;">🧾 MALL RECEIPT GENERATOR 🧾</h3>
+          <p style="text-align:center;">Push button 2 find out what u bought with ur allowance!!!</p>
+          <p style="text-align:center;">
+            <button class="arcade-btn" onclick="makeReceipt()">PRINT RECEIPT</button>
+          </p>
+          <div class="receipt" id="receiptOut">
+            NEON MALL<br>
+            --------------------<br>
+            awaiting purchase...
+          </div>
+        </div>
+
+        <p style="text-align:center; margin-top:16px;">
+          <a class="home-btn" href="index.html">🏠 BACK 2 HOMEPAGE</a>
+          <a class="home-btn" href="quiz.html">🔮 TAKE QUIZ</a>
+        </p>
+      </td>
+    </tr>
+  </table>
+
+  <div class="badge-row">
+    <span class="badge" style="background:#ffcc00;">Mall Rat<br>Certified</span>
+    <span class="badge" style="background:#00ccff;">Best viewed<br>Netscape 4.0</span>
+    <span class="badge" style="background:#ff99ff;">Arcade<br>Champion</span>
+    <span class="badge" style="background:#99ff99;">Food Court<br>VIP</span>
+    <span class="badge" style="background:#ccccff;">No Running<br>In Mall</span>
+    <span class="badge" style="background:#ff9966;">Made with<br>Notepad</span>
+  </div>
+
+  <footer>
+    <p>
+      © 1999 CyberDreamer99. All Mall Rights Reserved.<br>
+      Hosted on <b style="color:#ff00ff;">GeoCities</b> — Neighborhood: <i>Area51/DimensionX/MallFountain</i><br>
+      <span style="font-size:9px;">No actual tokens were harmed. Claw machine may eat ur quarters.<br>
+      Optimized for 56k modems and food court fluorescent lighting.</span>
+    </p>
+    <p class="blink" style="color:#ffff00; font-size:14px;">🛍️ THANKS 4 SHOPPING!!! MEET ME BY THE FOUNTAIN!!! 🛍️</p>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var el = document.getElementById('counter');
+    var n = 4412 + Math.floor(Math.random() * 5000);
+    function render() {
+      var s = String(n).padStart(6, '0');
+      el.textContent = s.slice(0, 3) + ',' + s.slice(3);
+    }
+    render();
+    setInterval(function () { n++; render(); }, 7000);
+  })();
+
+  (function () {
+    var alerts = ['NO RUNNING', 'LOITERING?', 'FOUNTAIN COIN THEFT', 'ARCADE CROWDING', 'GLITTER SPILL', 'PRETZEL EMERGENCY'];
+    var el = document.getElementById('alertLevel');
+    setInterval(function () {
+      el.textContent = alerts[Math.floor(Math.random() * alerts.length)];
+    }, 3500);
+  })();
+
+  var score = 0;
+  var started = false;
+
+  function visitStore(name, message) {
+    document.getElementById('directoryOut').innerHTML =
+      '&gt; NOW ENTERING: ' + name.toUpperCase() + '<br>&gt; ' + message;
+  }
+
+  function startGame() {
+    started = true;
+    score = 100;
+    document.getElementById('gameScreen').textContent =
+      'MALL QUEST START!!!\nCollect tokens.\nAvoid mall cops.\nScore: ' + score;
+  }
+
+  function jumpGame() {
+    if (!started) {
+      startGame();
+      return;
+    }
+    score += 25;
+    document.getElementById('gameScreen').textContent =
+      'U jumped over a spilled smoothie!!!\nBONUS +25\nScore: ' + score;
+  }
+
+  function zapGame() {
+    if (!started) {
+      startGame();
+      return;
+    }
+    var events = [
+      'Laser zapped a rogue pretzel!!!',
+      'U defeated the escalator goblin!!!',
+      'Token jackpot!!!',
+      'Mall cop says: WALK, DO NOT RUN!!!',
+      'Boss fight: The Fountain Kraken!!!'
+    ];
+    score += 50;
+    document.getElementById('gameScreen').textContent =
+      events[Math.floor(Math.random() * events.length)] + '\nScore: ' + score;
+  }
+
+  function foodOracle() {
+    var foods = [
+      'The oracle demands pizza, but only the corner slice.',
+      'Orange Julius energy detected. Confidence +12.',
+      'A pretzel will reveal ur destiny. Add cheese.',
+      'Beware the free sample toothpick. It knows too much.',
+      'Today u are spiritually a cinnamon roll.'
+    ];
+    document.getElementById('foodOracle').innerHTML =
+      '&gt; ' + foods[Math.floor(Math.random() * foods.length)];
+  }
+
+  function playClaw() {
+    var prizes = ['🧸', '🐸', '🐱', '🦄', '💿', '🛸', 'stale gumball', 'air'];
+    var prize = prizes[Math.floor(Math.random() * prizes.length)];
+    var out = document.getElementById('clawOut');
+    out.innerHTML = '&gt; claw descending...';
+    setTimeout(function () {
+      if (prize === 'air') {
+        out.innerHTML = '&gt; U won: AIR!!! The machine laughs in quarters.';
+      } else {
+        out.innerHTML = '&gt; U won: ' + prize + ' !!! Put it on ur backpack immediately.';
+      }
+    }, 500);
+  }
+
+  function makeReceipt() {
+    var items = [
+      ['butterfly clips', '3.99'],
+      ['arcade tokens', '2.00'],
+      ['pretzel + cheese', '4.25'],
+      ['mystery CD single', '1.99'],
+      ['blacklight poster', '6.66'],
+      ['tiny alien keychain', '2.49'],
+      ['gel pen 10-pack', '5.99']
+    ];
+    var item = items[Math.floor(Math.random() * items.length)];
+    var tax = (Number(item[1]) * 0.0825).toFixed(2);
+    var total = (Number(item[1]) + Number(tax)).toFixed(2);
+    document.getElementById('receiptOut').innerHTML =
+      'NEON MALL<br>' +
+      '--------------------<br>' +
+      item[0].toUpperCase() + '<br>' +
+      'SUBTOTAL ...... $' + item[1] + '<br>' +
+      'MALL TAX ...... $' + tax + '<br>' +
+      'TOTAL ......... $' + total + '<br>' +
+      '--------------------<br>' +
+      'THANK U 4 SHOPPING!!!';
+  }
+</script>
+
+</body>
+</html>

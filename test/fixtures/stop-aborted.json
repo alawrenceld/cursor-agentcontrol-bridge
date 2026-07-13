@@ -1,0 +1,7 @@
+{
+  "hook_event_name": "stop",
+  "conversation_id": "test-conv-0003",
+  "generation_id": "gen-0003",
+  "model": "auto",
+  "status": "aborted"
+}
