@@ -12706,7 +12706,7 @@ var require_node = __commonJS({
     var tty = require("tty");
     var util = require("util");
     exports2.init = init;
-    exports2.log = log2;
+    exports2.log = log3;
     exports2.formatArgs = formatArgs;
     exports2.save = save;
     exports2.load = load;
@@ -12841,7 +12841,7 @@ var require_node = __commonJS({
       }
       return (/* @__PURE__ */ new Date()).toISOString() + " ";
     }
-    function log2(...args) {
+    function log3(...args) {
       return process.stderr.write(util.formatWithOptions(exports2.inspectOpts, ...args) + "\n");
     }
     function save(namespaces) {
@@ -14317,7 +14317,7 @@ var import_node_path3 = __toESM(require("node:path"), 1);
 
 // src/lib/ldTrack.mjs
 var import_node_fs2 = require("node:fs");
-var import_node_crypto = require("node:crypto");
+var import_node_crypto2 = require("node:crypto");
 var import_node_os2 = __toESM(require("node:os"), 1);
 var import_node_path2 = __toESM(require("node:path"), 1);
 var import_node_url = require("node:url");
@@ -14362,6 +14362,386 @@ function appendUsageEvent({
   }
 }
 
+// src/lib/otlpEmit.mjs
+var import_node_crypto = require("node:crypto");
+
+// src/lib/cursorPricing.mjs
+var PRICING_PER_M = {
+  // Auto bills through its own flat pool; LD catalog has no cache-read rate.
+  auto: { in: 1.25, out: 6 },
+  composer: null,
+  "composer-1": { in: 1.25, out: 10 },
+  "composer-1-5": { in: 3.5, out: 17.5 },
+  "composer-2": { in: 0.5, out: 2.5 },
+  "composer-2-5": { in: 0.5, out: 2.5 },
+  "composer-2-5-fast": { in: 0.5, out: 2.5, catalogId: "composer-2.5" },
+  "claude-4-sonnet": { in: 3, out: 15 },
+  "claude-4-sonnet-1m": { in: 6, out: 22.5 },
+  "claude-4-5-haiku": { in: 1, out: 5 },
+  "claude-4-5-sonnet": { in: 3, out: 15 },
+  "claude-4-5-opus": { in: 5, out: 25 },
+  "claude-4-6-sonnet": { in: 3, out: 15 },
+  "claude-4-6-opus": { in: 5, out: 25 },
+  "claude-4-7-opus": { in: 5, out: 25 },
+  "claude-opus-4-7": { in: 30, out: 150 },
+  "claude-opus-4-8": { in: 5, out: 25 },
+  "claude-fable-5": { in: 10, out: 50 },
+  "claude-sonnet-5": { in: 2, out: 10 },
+  "gpt-5": { in: 1.25, out: 10 },
+  "gpt-5-mini": { in: 0.25, out: 2 },
+  "gpt-5-codex": { in: 1.25, out: 10 },
+  "gpt-5-1-codex": { in: 1.25, out: 10 },
+  "gpt-5-1-codex-max": { in: 1.25, out: 10 },
+  "gpt-5-1-codex-mini": { in: 0.25, out: 2 },
+  "gpt-5-2": { in: 1.75, out: 14 },
+  "gpt-5-2-codex": { in: 1.75, out: 14 },
+  "gpt-5-3-codex": { in: 1.75, out: 14 },
+  "gpt-5-4": { in: 2.5, out: 15 },
+  "gpt-5-4-mini": { in: 0.75, out: 4.5 },
+  "gpt-5-4-nano": { in: 0.2, out: 1.25 },
+  "gpt-5-5": { in: 5, out: 30 },
+  "gemini-2-5-flash": { in: 0.3, out: 2.5 },
+  "gemini-2-5-pro": { in: 1.25, out: 10 },
+  "gemini-3-flash": { in: 0.5, out: 3 },
+  "gemini-3-pro": { in: 2, out: 12 },
+  "gemini-3-pro-image-preview": { in: 2, out: 12 },
+  "gemini-3-1-pro": { in: 2, out: 12 },
+  "gemini-3-5-flash": { in: 1.5, out: 9 },
+  "grok-4-20": { in: 2, out: 6 },
+  "grok-4-3": { in: 1.25, out: 2.5 },
+  "grok-4-5": { in: 2, out: 6 },
+  "grok-4-5-fast": { in: 4, out: 18 },
+  "grok-build-0-1": { in: 1, out: 2 },
+  "glm-5-2": { in: 1.4, out: 4.4 },
+  "kimi-k2-7-code": { in: 0.95, out: 4 }
+};
+function perTokenPricing(variationKey) {
+  const pricing = PRICING_PER_M[variationKey];
+  if (!pricing) return null;
+  return { in: pricing.in / 1e6, out: pricing.out / 1e6 };
+}
+function estimateUsd({ variationKey, inputTokens = 0, outputTokens = 0 } = {}) {
+  const pricing = perTokenPricing(variationKey);
+  if (!pricing) return null;
+  const input = Number(inputTokens) || 0;
+  const output = Number(outputTokens) || 0;
+  if (input <= 0 && output <= 0) return null;
+  return input * pricing.in + output * pricing.out;
+}
+
+// src/lib/otlpEmit.mjs
+var DEFAULT_OTLP_ENDPOINT = "https://otel.observability.app.launchdarkly.com:4318";
+var EVENT_KEYS = {
+  durationTotal: "$ld:ai:duration:total",
+  tokensTotal: "$ld:ai:tokens:total",
+  tokensInput: "$ld:ai:tokens:input",
+  tokensOutput: "$ld:ai:tokens:output",
+  generationSuccess: "$ld:ai:generation:success",
+  generationError: "$ld:ai:generation:error"
+};
+function log(...parts) {
+  process.stderr.write(`[otlp] ${parts.join(" ")}
+`);
+}
+function attrString(key, value) {
+  if (value === void 0 || value === null || value === "") return null;
+  return { key, value: { stringValue: String(value) } };
+}
+function compactAttrs(attrs) {
+  return attrs.filter(Boolean);
+}
+function nanoNow() {
+  return `${BigInt(Date.now()) * 1000000n}`;
+}
+function hexId(bytes) {
+  return (0, import_node_crypto.randomBytes)(bytes).toString("hex");
+}
+function resolveOtlpConfig(bridgeConfig = {}, { sdkKey } = {}) {
+  if (process.env.OTLP_DISABLED === "1" || process.env.OTLP_DISABLED === "true") {
+    return { enabled: false, endpoint: DEFAULT_OTLP_ENDPOINT, sdkKey };
+  }
+  const otlp = bridgeConfig.otlp && typeof bridgeConfig.otlp === "object" ? bridgeConfig.otlp : {};
+  const enabled = otlp.enabled !== false;
+  const endpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || otlp.endpoint || DEFAULT_OTLP_ENDPOINT;
+  return { enabled, endpoint: String(endpoint).replace(/\/$/, ""), sdkKey };
+}
+function buildResourceAttributes(sdkKey) {
+  return compactAttrs([
+    attrString("service.name", "cursor-agentcontrol-bridge"),
+    attrString("service.namespace", "agentcontrol"),
+    sdkKey ? attrString("launchdarkly.project_id", sdkKey) : null
+  ]);
+}
+function buildTrackAttributes(context, data = {}) {
+  const email = context?.key;
+  return compactAttrs([
+    attrString("user.id", email),
+    attrString("user.email", email),
+    attrString("gen_ai.system", data.providerName),
+    attrString("provider", data.providerName),
+    attrString("gen_ai.request.model", data.modelName),
+    attrString("variation_key", data.variationKey),
+    attrString("config_key", data.configKey),
+    attrString("run_id", data.runId)
+  ]);
+}
+function mapTrackEvent(eventKey, context, data, metricValue, { timeUnixNano } = {}) {
+  const ts = timeUnixNano || nanoNow();
+  const attrs = buildTrackAttributes(context, data || {});
+  const value = typeof metricValue === "number" ? metricValue : 0;
+  const metrics = [];
+  let span = null;
+  switch (eventKey) {
+    case EVENT_KEYS.generationSuccess:
+      metrics.push({
+        name: "agent.generation",
+        unit: "1",
+        sumValue: 1,
+        attributes: [...attrs, attrString("outcome", "success")],
+        timeUnixNano: ts
+      });
+      span = {
+        name: "agent.generation",
+        attributes: [...attrs, attrString("outcome", "success")],
+        statusCode: 1,
+        // STATUS_CODE_OK
+        startTimeUnixNano: ts,
+        endTimeUnixNano: ts
+      };
+      break;
+    case EVENT_KEYS.generationError:
+      metrics.push({
+        name: "agent.generation",
+        unit: "1",
+        sumValue: 1,
+        attributes: [...attrs, attrString("outcome", "error")],
+        timeUnixNano: ts
+      });
+      span = {
+        name: "agent.generation",
+        attributes: [...attrs, attrString("outcome", "error")],
+        statusCode: 2,
+        // STATUS_CODE_ERROR
+        startTimeUnixNano: ts,
+        endTimeUnixNano: ts
+      };
+      break;
+    case EVENT_KEYS.durationTotal:
+      if (value > 0) {
+        metrics.push({
+          name: "agent.duration_ms",
+          unit: "ms",
+          sumValue: value,
+          attributes: attrs,
+          timeUnixNano: ts
+        });
+      }
+      break;
+    case EVENT_KEYS.tokensTotal:
+      if (value > 0) {
+        metrics.push({
+          name: "agent.tokens",
+          unit: "1",
+          sumValue: value,
+          attributes: [...attrs, attrString("token_type", "total")],
+          timeUnixNano: ts
+        });
+      }
+      break;
+    case EVENT_KEYS.tokensInput:
+      if (value > 0) {
+        metrics.push({
+          name: "agent.tokens",
+          unit: "1",
+          sumValue: value,
+          attributes: [...attrs, attrString("token_type", "input")],
+          timeUnixNano: ts
+        });
+      }
+      break;
+    case EVENT_KEYS.tokensOutput:
+      if (value > 0) {
+        metrics.push({
+          name: "agent.tokens",
+          unit: "1",
+          sumValue: value,
+          attributes: [...attrs, attrString("token_type", "output")],
+          timeUnixNano: ts
+        });
+      }
+      break;
+    default:
+      break;
+  }
+  return { metrics, span };
+}
+function groupMetricsByName(datapoints) {
+  const byName = /* @__PURE__ */ new Map();
+  for (const dp of datapoints) {
+    const key = `${dp.name}\0${dp.unit || ""}`;
+    if (!byName.has(key)) byName.set(key, { name: dp.name, unit: dp.unit, points: [] });
+    byName.get(key).points.push(dp);
+  }
+  return [...byName.values()];
+}
+function buildMetricsPayload(datapoints, sdkKey) {
+  const metrics = groupMetricsByName(datapoints).map((group) => ({
+    name: group.name,
+    unit: group.unit || "1",
+    description: group.name,
+    sum: {
+      aggregationTemporality: 1,
+      // AGGREGATION_TEMPORALITY_DELTA
+      isMonotonic: true,
+      dataPoints: group.points.map((dp) => ({
+        attributes: compactAttrs(dp.attributes),
+        timeUnixNano: dp.timeUnixNano,
+        asDouble: dp.sumValue
+      }))
+    }
+  }));
+  return {
+    resourceMetrics: [
+      {
+        resource: { attributes: buildResourceAttributes(sdkKey) },
+        scopeMetrics: [
+          {
+            scope: { name: "cursor-agentcontrol-bridge", version: "0.2.0" },
+            metrics
+          }
+        ]
+      }
+    ]
+  };
+}
+function buildTracesPayload(spans, sdkKey) {
+  const otlpSpans = spans.map((s) => {
+    const traceId = hexId(16);
+    const spanId = hexId(8);
+    return {
+      traceId,
+      spanId,
+      name: s.name,
+      kind: 1,
+      // INTERNAL
+      startTimeUnixNano: s.startTimeUnixNano,
+      endTimeUnixNano: s.endTimeUnixNano,
+      attributes: compactAttrs(s.attributes),
+      status: { code: s.statusCode ?? 0 }
+    };
+  });
+  return {
+    resourceSpans: [
+      {
+        resource: { attributes: buildResourceAttributes(sdkKey) },
+        scopeSpans: [
+          {
+            scope: { name: "cursor-agentcontrol-bridge", version: "0.2.0" },
+            spans: otlpSpans
+          }
+        ]
+      }
+    ]
+  };
+}
+async function postJson(url, body, { fetchImpl = fetch, dryRun = false } = {}) {
+  if (dryRun) {
+    log(`DRY_RUN POST ${url}`, JSON.stringify(body).slice(0, 500));
+    return { ok: true, dryRun: true };
+  }
+  const response = await fetchImpl(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    throw new Error(`${response.status} ${url}: ${text.slice(0, 200)}`);
+  }
+  return { ok: true };
+}
+function createOtlpEmitter({
+  enabled = true,
+  endpoint = DEFAULT_OTLP_ENDPOINT,
+  sdkKey = null,
+  dryRun = false,
+  fetchImpl = fetch
+} = {}) {
+  const metricsBuf = [];
+  const spansBuf = [];
+  const base = String(endpoint || DEFAULT_OTLP_ENDPOINT).replace(/\/$/, "");
+  return {
+    enabled: Boolean(enabled) && Boolean(sdkKey),
+    record(eventKey, context, data, metricValue) {
+      if (!enabled || !sdkKey) return;
+      try {
+        const { metrics, span } = mapTrackEvent(eventKey, context, data, metricValue);
+        metricsBuf.push(...metrics);
+        if (span) spansBuf.push(span);
+      } catch (err) {
+        log(`record failed: ${err.message}`);
+      }
+    },
+    /**
+     * Catalog-estimated USD — same rates as sync:models / Monitoring cost join.
+     * cost_source=ld_catalog so Observability totals match the plugin ≈$.
+     */
+    recordEstimatedCost(context, data, { input = 0, output = 0 } = {}) {
+      if (!enabled || !sdkKey) return;
+      try {
+        const usd = estimateUsd({
+          variationKey: data?.variationKey,
+          inputTokens: input,
+          outputTokens: output
+        });
+        if (usd == null || !(usd > 0)) return;
+        metricsBuf.push({
+          name: "agent.cost_usd",
+          unit: "USD",
+          sumValue: usd,
+          attributes: [
+            ...buildTrackAttributes(context, data || {}),
+            attrString("cost_source", "ld_catalog")
+          ],
+          timeUnixNano: nanoNow()
+        });
+      } catch (err) {
+        log(`recordEstimatedCost failed: ${err.message}`);
+      }
+    },
+    async flush({ timeoutMs = 2500 } = {}) {
+      if (!enabled || !sdkKey) return { skipped: true };
+      if (metricsBuf.length === 0 && spansBuf.length === 0) return { empty: true };
+      const metricsBody = metricsBuf.length ? buildMetricsPayload(metricsBuf.splice(0), sdkKey) : null;
+      const tracesBody = spansBuf.length ? buildTracesPayload(spansBuf.splice(0), sdkKey) : null;
+      const run = async () => {
+        const results = {};
+        if (metricsBody) {
+          results.metrics = await postJson(`${base}/v1/metrics`, metricsBody, { fetchImpl, dryRun });
+        }
+        if (tracesBody) {
+          results.traces = await postJson(`${base}/v1/traces`, tracesBody, { fetchImpl, dryRun });
+        }
+        return results;
+      };
+      try {
+        return await Promise.race([
+          run(),
+          new Promise(
+            (_, reject) => setTimeout(() => reject(new Error("otlp flush timeout")), timeoutMs).unref?.()
+          )
+        ]);
+      } catch (err) {
+        log(`flush failed: ${err.message}`);
+        return { error: err.message };
+      }
+    }
+  };
+}
+
 // src/lib/ldTrack.mjs
 var import_meta = {};
 var moduleDir = (() => {
@@ -14374,7 +14754,7 @@ var moduleDir = (() => {
 var PROJECT_ROOT = import_node_path2.default.resolve(moduleDir, "..", "..");
 var USER_CONFIG_PATH = import_node_path2.default.join(import_node_os2.default.homedir(), ".cursor", "ld-agentcontrol.json");
 var USER_STATE_DIR = import_node_path2.default.join(import_node_os2.default.homedir(), ".cursor", "ld-agentcontrol-state");
-var EVENT_KEYS = {
+var EVENT_KEYS2 = {
   durationTotal: "$ld:ai:duration:total",
   tokensTtf: "$ld:ai:tokens:ttf",
   tokensTotal: "$ld:ai:tokens:total",
@@ -14442,7 +14822,7 @@ function resolveVariation(config, modelName) {
   }
 }
 function buildTrackData({
-  runId = (0, import_node_crypto.randomUUID)(),
+  runId = (0, import_node_crypto2.randomUUID)(),
   configKey,
   variationKey,
   version,
@@ -14463,7 +14843,7 @@ function buildTrackData({
 function userContext(email) {
   return { kind: "user", key: email };
 }
-function log(...parts) {
+function log2(...parts) {
   process.stderr.write(`[ldTrack] ${parts.join(" ")}
 `);
 }
@@ -14496,25 +14876,40 @@ async function createLdTracker({
   sdkKey = process.env.LD_SDK_KEY,
   stateDir = null
 } = {}) {
-  const resolvedStateDir = stateDir ?? (() => {
-    try {
-      return resolveRuntime().stateDir;
-    } catch {
-      return USER_STATE_DIR;
-    }
-  })();
+  let resolvedStateDir = stateDir;
+  let bridgeConfig = {};
+  try {
+    const runtime2 = resolveRuntime();
+    resolvedStateDir ??= runtime2.stateDir;
+    bridgeConfig = runtime2.config ?? {};
+    sdkKey ??= runtime2.sdkKey;
+  } catch {
+    resolvedStateDir ??= USER_STATE_DIR;
+  }
+  const otlpOpts = resolveOtlpConfig(bridgeConfig, { sdkKey });
+  const otlp = createOtlpEmitter({
+    enabled: otlpOpts.enabled,
+    endpoint: otlpOpts.endpoint,
+    sdkKey,
+    dryRun
+  });
   if (dryRun) {
     return {
       dryRun: true,
       track(eventKey, context, data, metricValue) {
-        log(`DRY_RUN track ${eventKey}`, JSON.stringify({ context, data, metricValue }));
+        log2(`DRY_RUN track ${eventKey}`, JSON.stringify({ context, data, metricValue }));
         recordLedger(eventKey, context, data, metricValue, resolvedStateDir);
+        otlp.record(eventKey, context, data, metricValue);
+      },
+      recordEstimatedCost(context, data, tokens) {
+        otlp.recordEstimatedCost(context, data, tokens);
       },
       async evaluate(flagKey, context) {
-        log(`DRY_RUN evaluate ${flagKey}`, JSON.stringify(context));
+        log2(`DRY_RUN evaluate ${flagKey}`, JSON.stringify(context));
         return null;
       },
-      async close() {
+      async close({ flushTimeoutMs = 3e3 } = {}) {
+        await otlp.flush({ timeoutMs: Math.min(2500, flushTimeoutMs) });
       }
     };
   }
@@ -14523,7 +14918,7 @@ async function createLdTracker({
   const client = init(sdkKey, {
     stream: false,
     diagnosticOptOut: true,
-    logger: { error: log, warn: log, info: () => {
+    logger: { error: log2, warn: log2, info: () => {
     }, debug: () => {
     } }
   });
@@ -14532,13 +14927,17 @@ async function createLdTracker({
     await client.waitForInitialization({ timeout: 5 });
   } catch {
     initialized = false;
-    log("client initialization timed out/failed; proceeding (events still flush)");
+    log2("client initialization timed out/failed; proceeding (events still flush)");
   }
   return {
     dryRun: false,
     track(eventKey, context, data, metricValue) {
       client.track(eventKey, context, data, metricValue);
       recordLedger(eventKey, context, data, metricValue, resolvedStateDir);
+      otlp.record(eventKey, context, data, metricValue);
+    },
+    recordEstimatedCost(context, data, tokens) {
+      otlp.recordEstimatedCost(context, data, tokens);
     },
     /**
      * Evaluate an AI Config flag so LD serves the variation (targeting rules
@@ -14552,7 +14951,7 @@ async function createLdTracker({
         const value = await client.variation(flagKey, context, null);
         return value?._ldMeta?.variationKey ? value : null;
       } catch (err) {
-        log(`evaluate failed: ${err.message}`);
+        log2(`evaluate failed: ${err.message}`);
         return null;
       }
     },
@@ -14565,16 +14964,18 @@ async function createLdTracker({
           )
         ]);
       } catch (err) {
-        log(`flush failed: ${err.message}`);
+        log2(`flush failed: ${err.message}`);
       }
+      await otlp.flush({ timeoutMs: Math.min(2500, flushTimeoutMs) });
       client.close();
     }
   };
 }
 function trackTokens(tracker, context, trackData, { total, input, output }) {
-  if (total > 0) tracker.track(EVENT_KEYS.tokensTotal, context, trackData, total);
-  if (input > 0) tracker.track(EVENT_KEYS.tokensInput, context, trackData, input);
-  if (output > 0) tracker.track(EVENT_KEYS.tokensOutput, context, trackData, output);
+  if (total > 0) tracker.track(EVENT_KEYS2.tokensTotal, context, trackData, total);
+  if (input > 0) tracker.track(EVENT_KEYS2.tokensInput, context, trackData, input);
+  if (output > 0) tracker.track(EVENT_KEYS2.tokensOutput, context, trackData, output);
+  tracker.recordEstimatedCost?.(context, trackData, { input, output });
 }
 
 // src/hooks/cursor-hook.mjs
@@ -14729,9 +15130,9 @@ async function handleStop(payload) {
     }
   });
   if (durationMs !== null) {
-    tracker.track(EVENT_KEYS.durationTotal, context, trackData, durationMs);
+    tracker.track(EVENT_KEYS2.durationTotal, context, trackData, durationMs);
   }
-  const eventKey = status === "error" ? EVENT_KEYS.generationError : EVENT_KEYS.generationSuccess;
+  const eventKey = status === "error" ? EVENT_KEYS2.generationError : EVENT_KEYS2.generationSuccess;
   tracker.track(eventKey, context, trackData, 1);
   if (hasTokens) {
     trackTokens(tracker, context, trackData, {

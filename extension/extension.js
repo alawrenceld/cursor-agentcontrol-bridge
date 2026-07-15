@@ -101,6 +101,32 @@ function ensureWritePath(context) {
       'AgentControl: Cursor hook registered. Fully restart Cursor to start capturing agent runs.',
     );
   }
+  // Older publisher builds (e.g. ttotenberg 0.3.x) also rewrite hooks.json on
+  // activate — if both are installed, whoever activates last wins and Me ledger
+  // never fills. Surface that clearly.
+  try {
+    const extDir = path.dirname(path.dirname(bundledHook));
+    const siblingRoot = path.dirname(extDir);
+    const conflicts = fs
+      .readdirSync(siblingRoot)
+      .filter(
+        (name) =>
+          /cursor-agentcontrol-metrics/i.test(name) &&
+          !extDir.endsWith(name) &&
+          fs.existsSync(path.join(siblingRoot, name, 'hook', 'cursor-hook.js')),
+      );
+    if (conflicts.length) {
+      vscode.window.showWarningMessage(
+        `AgentControl: also found older install(s) (${conflicts.join(', ')}). ` +
+          'Uninstall them — they overwrite hooks.json and Me stays at 0.',
+        'Open Extensions',
+      ).then((pick) => {
+        if (pick) vscode.commands.executeCommand('workbench.extensions.action.showInstalledExtensions');
+      });
+    }
+  } catch {
+    // ignore fs probe failures
+  }
   if (!health.sdkKeyPresent) {
     vscode.window
       .showWarningMessage(

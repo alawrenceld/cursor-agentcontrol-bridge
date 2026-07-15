@@ -2,7 +2,7 @@
   "name": "cursor-agentcontrol-metrics",
   "displayName": "AgentControl Metrics",
   "description": "LaunchDarkly AI Config Monitoring metrics for Cursor agent usage, inside the IDE",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "publisher": "alawrenceld",
   "private": true,
   "license": "MIT",

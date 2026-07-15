@@ -1,29 +1,11 @@
 # AgentControl Metrics (Cursor extension)
 
-All-in-one Cursor↔LaunchDarkly bridge: records every agent run to a LaunchDarkly AI
-Config (bundled hook, self-installing) and surfaces usage metrics inside the IDE.
+Records Cursor agent runs to LaunchDarkly and shows **All** (team Monitoring) vs **Me** (local ledger) in the IDE. Also dual-emits OTLP for Observability per-user charts.
 
-**Write path:** the extension ships a self-contained Cursor hook and, on activation,
-registers it in `~/.cursor/hooks.json` and seeds `~/.cursor/ld-agentcontrol.json`.
-That file holds `sdkKey`, `hookUserEmail` (Me identity), the model→variation map, and
-config keys. State/logs go to `~/.cursor/ld-agentcontrol-state/` (including
-`usage-events.jsonl` for the Me view). Restart Cursor fully after first install.
+**Full setup (SDK key, API token, project key, email):**  
+[SETUP.md](https://github.com/alawrenceld/cursor-agentcontrol-bridge/blob/main/SETUP.md)
 
-**Scopes:**
-
-- **All** — LaunchDarkly AI Config Monitoring APIs (`/metrics`, `/metrics-by-variation`):
-  team-wide totals for the project (requires a reader API token).
-- **Me** — aggregates the local usage ledger for your `hookUserEmail`. Generations,
-  duration, success/error, and any tokens the hook/poller wrote on this machine.
-  Team tokens ingested only by a shared poller elsewhere will not appear under Me
-  unless those events also land in your local ledger (see `docs/SPIKE-me-remote.md`).
-
-- **Status bar**: generations · tokens · cost for the selected range and scope.
-- **Sidebar panel**: All|Me toggle, time-range presets, per-model table.
-
-## Install
-
-See [SETUP.md](https://github.com/alawrenceld/cursor-agentcontrol-bridge/blob/main/SETUP.md) for end-user steps. From source:
+## Quick install from source
 
 ```sh
 npm run build:hook                   # from the repo root
@@ -33,9 +15,19 @@ npm install
 cursor --install-extension cursor-agentcontrol-metrics-*.vsix
 ```
 
-Then configure (Command Palette):
+Then **fully quit Cursor**, reopen, and configure:
 
-1. **Set LaunchDarkly SDK Key** — record runs
-2. **Set Your Email** — Me filter + LD context key
-3. Settings → AgentControl Metrics → your `projectKey`
-4. Optional: **Set LaunchDarkly API Token** — team All view
+| Step | Command / setting |
+|------|-------------------|
+| 1 | Uninstall any older AgentControl / other-publisher builds |
+| 2 | Settings → `ldAgentControl.projectKey` (+ config/env keys) |
+| 3 | **AgentControl: Set LaunchDarkly SDK Key** (server-side) |
+| 4 | **AgentControl: Set Your Email** |
+| 5 | **AgentControl: Set LaunchDarkly API Token** (Reader — for **All** only) |
+
+## Scopes
+
+- **All** — LD `/metrics` (Reader API token + project key)
+- **Me** — `~/.cursor/ld-agentcontrol-state/usage-events.jsonl` filtered by email
+
+Hooks + config: `~/.cursor/hooks.json`, `~/.cursor/ld-agentcontrol.json`.

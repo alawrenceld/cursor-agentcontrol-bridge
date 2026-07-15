@@ -11,6 +11,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { appendUsageEvent } from './usageLedger.mjs';
+import { createOtlpEmitter, resolveOtlpConfig } from './otlpEmit.mjs';
 
 // import.meta.url is empty when esbuild bundles this to CJS for the
 // extension; there __dirname exists instead (and PROJECT_ROOT only matters
@@ -200,16 +201,25 @@ export async function createLdTracker({
   sdkKey = process.env.LD_SDK_KEY,
   stateDir = null,
 } = {}) {
-  // Resolve state dir lazily so callers in repo mode write under `.state/`.
-  const resolvedStateDir =
-    stateDir ??
-    (() => {
-      try {
-        return resolveRuntime().stateDir;
-      } catch {
-        return USER_STATE_DIR;
-      }
-    })();
+  // Resolve state dir / otlp config lazily so callers in repo mode write under `.state/`.
+  let resolvedStateDir = stateDir;
+  let bridgeConfig = {};
+  try {
+    const runtime = resolveRuntime();
+    resolvedStateDir ??= runtime.stateDir;
+    bridgeConfig = runtime.config ?? {};
+    sdkKey ??= runtime.sdkKey;
+  } catch {
+    resolvedStateDir ??= USER_STATE_DIR;
+  }
+
+  const otlpOpts = resolveOtlpConfig(bridgeConfig, { sdkKey });
+  const otlp = createOtlpEmitter({
+    enabled: otlpOpts.enabled,
+    endpoint: otlpOpts.endpoint,
+    sdkKey,
+    dryRun,
+  });
 
   if (dryRun) {
     return {
@@ -217,12 +227,18 @@ export async function createLdTracker({
       track(eventKey, context, data, metricValue) {
         log(`DRY_RUN track ${eventKey}`, JSON.stringify({ context, data, metricValue }));
         recordLedger(eventKey, context, data, metricValue, resolvedStateDir);
+        otlp.record(eventKey, context, data, metricValue);
+      },
+      recordEstimatedCost(context, data, tokens) {
+        otlp.recordEstimatedCost(context, data, tokens);
       },
       async evaluate(flagKey, context) {
         log(`DRY_RUN evaluate ${flagKey}`, JSON.stringify(context));
         return null;
       },
-      async close() {},
+      async close({ flushTimeoutMs = 3000 } = {}) {
+        await otlp.flush({ timeoutMs: Math.min(2500, flushTimeoutMs) });
+      },
     };
   }
 
@@ -251,6 +267,10 @@ export async function createLdTracker({
     track(eventKey, context, data, metricValue) {
       client.track(eventKey, context, data, metricValue);
       recordLedger(eventKey, context, data, metricValue, resolvedStateDir);
+      otlp.record(eventKey, context, data, metricValue);
+    },
+    recordEstimatedCost(context, data, tokens) {
+      otlp.recordEstimatedCost(context, data, tokens);
     },
     /**
      * Evaluate an AI Config flag so LD serves the variation (targeting rules
@@ -279,6 +299,7 @@ export async function createLdTracker({
       } catch (err) {
         log(`flush failed: ${err.message}`);
       }
+      await otlp.flush({ timeoutMs: Math.min(2500, flushTimeoutMs) });
       client.close();
     },
   };
@@ -292,4 +313,6 @@ export function trackTokens(tracker, context, trackData, { total, input, output 
   if (total > 0) tracker.track(EVENT_KEYS.tokensTotal, context, trackData, total);
   if (input > 0) tracker.track(EVENT_KEYS.tokensInput, context, trackData, input);
   if (output > 0) tracker.track(EVENT_KEYS.tokensOutput, context, trackData, output);
+  // Catalog estimate for Observability — same $/token as Monitoring after sync:models.
+  tracker.recordEstimatedCost?.(context, trackData, { input, output });
 }

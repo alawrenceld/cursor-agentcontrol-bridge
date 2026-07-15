@@ -1,171 +1,126 @@
 # cursor-agentcontrol-bridge
 
-Measure AI agent activity inside the Cursor IDE (including auto mode) and feed it into a
-LaunchDarkly AI Config **Monitoring** dashboard, broken out by model: generation counts,
-success/error rate, duration, tokens, and LD-derived cost.
+Measure AI agent activity inside the Cursor IDE and feed it into LaunchDarkly:
 
-Two independent event streams feed the same AI Config:
+- **AI Config Monitoring** — team totals by model (generations, success/error, duration, tokens, LD-derived cost)
+- **Local Me ledger** — per-user view inside the IDE
+- **OTLP dual-emit** — per-user attributes in LaunchDarkly Observability
 
 ```
 Cursor IDE
- ├─ hooks (real-time) ──► src/hooks/cursor-hook.mjs ──► duration + generation success/error
- └─ Admin API (hourly) ──► src/poller/poll-usage-events.mjs ──► input/output/total tokens
-                                        │
-                                        ▼
-                     LD server SDK track() → AI Config "cursor-agent-usage"
-                     Monitoring tab: per-variation (= per-model) metrics
+ ├─ hooks (real-time) ──► duration + generation success/error (+ ledger + OTLP)
+ └─ Admin API (hourly) ──► input/output/total tokens   [optional, Teams+]
+                │
+                ▼
+   LD server SDK track()  →  AI Config "cursor-agent-usage"  →  Monitoring (All)
+   OTLP /v1/metrics|traces →  Observability (user.email × model)
 ```
 
-No per-run join is needed — the dashboard aggregates each metric independently.
-See `PLAN.md` for the research behind this shape.
+**Recommended install:** the Cursor extension — see **[SETUP.md](SETUP.md)** for  
+project key, environment, AI Config, **SDK key**, Reader **API token**, and email.
+
+This README is the **repo / poller** path. Extension packaging details: [extension/README.md](extension/README.md).
 
 ## Prerequisites
 
 - Node 18+.
-- A LaunchDarkly server-side SDK key for the environment where metrics should land.
-- **Poller only:** a Cursor **Teams/Business/Enterprise** plan and an Admin API key
-  (Cursor dashboard → Settings → Advanced → Admin API Keys). Individual/Pro plans have no
-  token/cost source; hooks-only mode still gives counts, duration, and success rate by model.
+- A LaunchDarkly account and project with:
+  - AI Config `cursor-agent-usage` (variations per model)
+  - **Server-side SDK key** (write / record)
+  - Optional **Reader API token** (All panel) — not the same as the SDK key
+  - Optional **Writer API token** only for `setup:ai-config` / `sync:models` scripts
+- **Poller only:** Cursor Teams/Business/Enterprise + Cursor Admin API key  
+  (Cursor → Settings → Advanced → Admin API Keys). Hooks-only still gives counts, duration, and success by model.
 
-## Setup
+## Credentials cheat sheet
+
+| Secret | Used by | Role |
+|--------|---------|------|
+| LD **SDK key** (server-side) | Hook / extension record path, OTLP `launchdarkly.project_id` | Write events |
+| LD **API token** (Reader) | Extension **All** panel | Read `/metrics` |
+| LD **API token** (Writer) | `npm run setup:ai-config`, `sync:models` | Provision configs |
+| `LD_PROJECT_KEY` | Scripts + extension setting `projectKey` | Address the project |
+| Cursor **Admin API** key | `poller:*` only | Token ingestion |
+
+Details and UI command names: [SETUP.md](SETUP.md).
+
+## Repo setup (hooks without the extension)
 
 ### 1. Install & configure
 
 ```sh
 npm install
-cp .env.example .env   # then fill in LD_SDK_KEY (and CURSOR_ADMIN_KEY for the poller)
+cp .env.example .env   # LD_SDK_KEY; CURSOR_ADMIN_KEY for poller; LD_API_TOKEN for scripts
 ```
 
 Edit `bridge.config.json`:
 
-- `models` — map of Cursor model strings → AI Config variation keys. Unmapped models are
-  skipped and logged (set `fallbackVariation` to catch them instead).
-- `hookUserEmail` — your email; the hook payload doesn't carry one, and the LD context key
-  should match what the Admin API reports so both streams attribute to the same user.
-- `userEmails` — poller allowlist, so you don't ingest the whole team. Empty array = everyone.
-- `emitGenerationsFromPoller` — set `true` **only** when running the poller without hooks,
-  so generation counts still exist. Never run both ways or counts double.
+- `models` — Cursor model string → AI Config variation key  
+- `hookUserEmail` — your email (LD context + Me)  
+- `userEmails` — poller allowlist (`[]` = everyone)  
+- `otlp` — dual-emit to Observability (default enabled; optional `endpoint` / Grafana via Collector — [docs/OTLP-DUAL-EMIT.md](docs/OTLP-DUAL-EMIT.md))  
+- `emitGenerationsFromPoller` — `true` only if poller runs **without** hooks  
 
 ### 2. Create the AI Config
 
-The config is measurement-only — nothing evaluates it; variations exist so the Monitoring
-tab breaks out per model. Either:
+Measurement-only; variations break out Monitoring by model:
 
-- run `LD_API_TOKEN=... LD_PROJECT_KEY=... npm run setup:ai-config` (uses the beta AI
-  Configs REST API; on schema drift it prints the response body — fall back to the UI), or
-- create it by hand in the LD UI (AI Configs → New) or via the LaunchDarkly MCP server:
-  one AI Config with key `cursor-agent-usage`, one variation per entry in `models`, each
-  variation's model name set to the Cursor model string and provider set to `cursor`.
-
-### 3. Register the Cursor hooks
-
-Add to `~/.cursor/hooks.json` (create it if missing), using the **absolute** path to this
-repo, then fully restart Cursor (hooks load at startup):
-
-```json
-{
-  "version": 1,
-  "hooks": {
-    "beforeSubmitPrompt": [
-      { "command": "node /ABS/PATH/TO/cursor-agentcontrol-bridge/src/hooks/cursor-hook.mjs" }
-    ],
-    "stop": [
-      { "command": "node /ABS/PATH/TO/cursor-agentcontrol-bridge/src/hooks/cursor-hook.mjs" }
-    ]
-  }
-}
+```sh
+LD_API_TOKEN=... LD_PROJECT_KEY=... npm run setup:ai-config
 ```
 
-The hook is fail-safe: it always exits 0 and `beforeSubmitPrompt` does no network I/O, so a
-bridge failure can't break Cursor. Activity is logged to `.state/hook.log`.
+Or create in the LD UI / MCP: config key `cursor-agent-usage`, one variation per `models` entry, provider `cursor`.
 
-### 4. Schedule the poller
+### 3. Register Cursor hooks
 
-One-shot: `npm run poller:once`. Long-running: `npm run poller:loop` (hourly).
+Prefer the **extension** (it maintains `~/.cursor/hooks.json`). For repo-mode only, point hooks at this checkout’s `src/hooks/cursor-hook.mjs`, then **fully restart Cursor**.
 
-Cron:
+Fail-safe: hook exits 0; logs under `.state/hook.log` (repo) or `~/.cursor/ld-agentcontrol-state/hook.log` (extension).
 
-```cron
-5 * * * * cd /ABS/PATH/TO/cursor-agentcontrol-bridge && /usr/local/bin/node src/poller/poll-usage-events.mjs >> .state/poller.log 2>&1
+### 4. Schedule the poller (optional)
+
+```sh
+npm run poller:once    # or poller:loop / cron / launchd — see older docs in git history if needed
+npm run poller:dry     # Admin API only, no LD writes
 ```
-
-launchd (macOS) — save as `~/Library/LaunchAgents/com.cursor-agentcontrol-bridge.poller.plist`
-and run `launchctl load` on it:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-  <key>Label</key><string>com.cursor-agentcontrol-bridge.poller</string>
-  <key>ProgramArguments</key><array>
-    <string>/usr/local/bin/node</string>
-    <string>/ABS/PATH/TO/cursor-agentcontrol-bridge/src/poller/poll-usage-events.mjs</string>
-  </array>
-  <key>WorkingDirectory</key><string>/ABS/PATH/TO/cursor-agentcontrol-bridge</string>
-  <key>StartInterval</key><integer>3600</integer>
-  <key>StandardErrorPath</key><string>/ABS/PATH/TO/cursor-agentcontrol-bridge/.state/poller.log</string>
-</dict></plist>
-```
-
-The poller keeps `.state/poller-state.json` (last-seen timestamp + event hashes) and
-re-fetches a 2h overlap window each run, so late-landing hourly batches are caught without
-double-counting. Backfill with `--since 2026-06-01`; preview anything with `--dry-run`.
 
 ## Verification
 
-1. **Dry runs first.** `npm test`, then `npm run hook:test` (fixture payloads through the
-   hook), then `npm run poller:dry` (real Admin API, nothing sent to LD — also confirms the
-   live response field names match what the code expects; unknown shapes are logged).
-2. **Spot-check the attribution assumption.** The Monitoring tab reading
-   `variationKey`/`version` from event data is confirmed from SDK source but undocumented.
-   Fire one real event per type (run the hook with `DRY_RUN` unset on a fixture, or one
-   poller cycle) and confirm each lands on the intended variation before trusting anything.
-3. **Live hook check.** Run one real Cursor agent session; generation + duration should
-   appear in Monitoring within minutes. Check `.state/hook.log` if not.
-4. **Token reconciliation.** After a day, compare dashboard token totals against Cursor's
-   own usage page (Admin API data is hourly-fresh, so expect lag on the last hour).
+1. `npm test` then `npm run hook:test`.
+2. One live Cursor agent run → Monitoring + **Me** ledger ([SETUP.md](SETUP.md) verify section).
+3. If using Observability: [docs/OTLP-DUAL-EMIT.md](docs/OTLP-DUAL-EMIT.md).
 
 ## Me vs All & reporting
 
-- Extension sidebar: **All** (LD Monitoring, team) vs **Me** (local `usage-events.jsonl`
-  filtered by `hookUserEmail`). See [SETUP.md](SETUP.md).
-- Me tokens only include events written on this machine; see [docs/SPIKE-me-remote.md](docs/SPIKE-me-remote.md).
-- Exec report (user/model filters + CSV): `npm run report:export && npm run report:serve`
-  ([report/](report/)).
-- Multi-provider roadmap: [docs/AGENT_USAGE_EVENT.md](docs/AGENT_USAGE_EVENT.md).
+- Sidebar **All** / **Me**: [SETUP.md](SETUP.md)
+- Me tokens only from this machine’s ledger: [docs/SPIKE-me-remote.md](docs/SPIKE-me-remote.md)
+- OTLP per-user reporting: [docs/OTLP-DUAL-EMIT.md](docs/OTLP-DUAL-EMIT.md)
+- Exec CSV report: `npm run report:export && npm run report:serve` ([report/](report/))
+- Multi-provider roadmap: [docs/AGENT_USAGE_EVENT.md](docs/AGENT_USAGE_EVENT.md)
 
 ## Limitations
 
-- **Tokens/cost need Teams+.** Hooks-only mode has no token source (Cursor doesn't put
-  tokens in hook payloads — open feature requests: forum threads 146980, 164583).
-- **Duration is wall-clock** from prompt-submit to stop, including tool time — "execution
-  time", not model latency. The Admin API has no per-request latency at all.
-- **Dashboard cost is LD-derived** (tokens × LD's model pricing) and won't include Cursor's
-  markup. True spend rides along in event data (`totalCents`, `chargedCents`) and stays
-  visible in Cursor's own dashboard. `$ld:ai:tokens:total` includes cache read/write
-  tokens; `input`/`output` stay raw so LD's derived cost isn't inflated by cache reads.
-- **`auto` mode:** payloads are expected to report the actually-selected model; if a live
-  run shows literal `auto`, it has its own variation in the default `models` map.
-- Cursor's hook payload and Admin API schemas are young and may drift — the code logs
-  unknown shapes rather than guessing (`.state/hook.log`, poller stderr).
-- Measurement only: this gives LD no control over Cursor's model choice.
+- **Tokens/cost need Teams+** for the Admin API poller. Hooks-only has no reliable token source in payloads.
+- **Duration** is wall-clock prompt→stop (includes tool time).
+- **Monitoring cost** is LD catalog-derived (not Cursor billed markup).
+- **Measurement only** — LD does not choose Cursor’s model.
+- Only one AgentControl extension version should be installed; older builds steal `hooks.json`.
 
 ## Repo layout
 
 | Path | Purpose |
 |---|---|
-| `src/hooks/cursor-hook.mjs` | Cursor hook entrypoint (`beforeSubmitPrompt` + `stop`) |
-| `src/poller/poll-usage-events.mjs` | Hourly Admin API poller → token events |
-| `src/lib/ldTrack.mjs` | Shared LD client wrapper; payloads mirror `@launchdarkly/server-sdk-ai` |
-| `scripts/setup-ai-config.mjs` | Optional: create the AI Config + variations via REST |
-| `bridge.config.json` | Config key, model→variation map, allowlist (repo mode; the extension seeds `~/.cursor/ld-agentcontrol.json` from it for user mode) |
-| `extension/` | All-in-one Cursor extension: bundled self-installing hook + Monitoring metrics UI (**All** from LD, **Me** from local ledger) — see its README and [SETUP.md](SETUP.md) |
-| `report/` | Standalone exec reporting page (filters + CSV) over exported ledger / summary JSON |
-| `docs/` | Spike notes, `AgentUsageEvent` multi-provider roadmap |
-| `scripts/sync-model-library.mjs` | Create `Cursor.*` entries in LD's model library at Cursor's billed prices and link every variation (required for cost derivation) |
-| `test/` | Payload-shape tests against the real AI SDK + poller and extension logic tests |
+| [SETUP.md](SETUP.md) | Extension install + LD credentials |
+| `src/hooks/cursor-hook.mjs` | Hook entry (`beforeSubmitPrompt` + `stop`) |
+| `src/poller/poll-usage-events.mjs` | Admin API → token events |
+| `src/lib/ldTrack.mjs` | LD `track()` + ledger + OTLP flush |
+| `src/lib/otlpEmit.mjs` | OTLP/HTTP JSON dual-emit |
+| `src/lib/usageLedger.mjs` | Local Me ledger |
+| `extension/` | VSIX: self-installing hook + All/Me UI |
+| `bridge.config.json` | Models map, otlp, emails (seeds user config) |
+| `scripts/setup-ai-config.mjs` / `sync-model-library.mjs` | Provision AI Config + pricing |
+| `report/` | Standalone ledger report UI |
+| `docs/` | OTLP, spikes, AgentUsageEvent |
+| `test/` | Unit tests |
 
-Note on cost: LD prices events **at ingestion** by joining the event's variation to its
-selected model (`modelConfigKey` + `model.modelName`) in the model library. Run
-`npm run sync:models` after adding variations, or costs stay $0 — and events recorded
-before the link stay $0 forever.
+After adding model variations, run `npm run sync:models` or Monitoring estimated cost stays `$0`.

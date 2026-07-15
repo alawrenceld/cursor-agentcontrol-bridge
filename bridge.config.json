@@ -63,5 +63,9 @@
   },
   "hookUserEmail": "",
   "userEmails": [],
-  "emitGenerationsFromPoller": false
+  "emitGenerationsFromPoller": false,
+  "otlp": {
+    "enabled": true,
+    "endpoint": "https://otel.observability.app.launchdarkly.com:4318"
+  }
 }
