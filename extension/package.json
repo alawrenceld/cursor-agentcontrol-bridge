@@ -6,6 +6,10 @@
   "publisher": "alawrenceld",
   "private": true,
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alawrenceld/cursor-agentcontrol-bridge.git"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },

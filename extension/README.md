@@ -23,7 +23,7 @@ config keys. State/logs go to `~/.cursor/ld-agentcontrol-state/` (including
 
 ## Install
 
-See [SETUP.md](../SETUP.md) for end-user steps. From source:
+See [SETUP.md](https://github.com/alawrenceld/cursor-agentcontrol-bridge/blob/main/SETUP.md) for end-user steps. From source:
 
 ```sh
 npm run build:hook                   # from the repo root
