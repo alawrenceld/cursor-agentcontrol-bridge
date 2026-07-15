@@ -3,7 +3,7 @@
 // OTLP collector). Fail-soft: never throws into the hook path.
 
 import { randomBytes } from 'node:crypto';
-import { estimateUsd } from './cursorPricing.mjs';
+import { estimateUsd } from './pricingRegistry.mjs';
 
 export const DEFAULT_OTLP_ENDPOINT = 'https://otel.observability.app.launchdarkly.com:4318';
 

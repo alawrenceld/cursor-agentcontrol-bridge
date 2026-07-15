@@ -14429,6 +14429,48 @@ function estimateUsd({ variationKey, inputTokens = 0, outputTokens = 0 } = {}) {
   return input * pricing.in + output * pricing.out;
 }
 
+// src/lib/claudePricing.mjs
+var PRICING_PER_M2 = {
+  "claude-4-sonnet": { in: 3, out: 15 },
+  "claude-4-sonnet-1m": { in: 6, out: 22.5 },
+  "claude-4-5-haiku": { in: 1, out: 5 },
+  "claude-4-5-sonnet": { in: 3, out: 15 },
+  "claude-4-5-opus": { in: 5, out: 25 },
+  "claude-4-6-sonnet": { in: 3, out: 15 },
+  "claude-4-6-opus": { in: 5, out: 25 },
+  "claude-4-7-opus": { in: 5, out: 25 },
+  "claude-opus-4-7": { in: 15, out: 75 },
+  "claude-opus-4-8": { in: 5, out: 25 },
+  "claude-sonnet-4": { in: 3, out: 15 },
+  "claude-sonnet-4-5": { in: 3, out: 15 },
+  "claude-sonnet-4-6": { in: 3, out: 15 },
+  "claude-sonnet-5": { in: 3, out: 15 },
+  "claude-haiku-4-5": { in: 1, out: 5 },
+  "claude-3-5-haiku": { in: 0.8, out: 4 },
+  "claude-3-5-sonnet": { in: 3, out: 15 },
+  "claude-3-7-sonnet": { in: 3, out: 15 },
+  "claude-opus-4": { in: 15, out: 75 },
+  "claude-opus-4-1": { in: 15, out: 75 }
+};
+function perTokenPricing2(variationKey) {
+  const pricing = PRICING_PER_M2[variationKey];
+  if (!pricing) return null;
+  return { in: pricing.in / 1e6, out: pricing.out / 1e6 };
+}
+function estimateUsd2({ variationKey, inputTokens = 0, outputTokens = 0 } = {}) {
+  const pricing = perTokenPricing2(variationKey);
+  if (!pricing) return null;
+  const input = Number(inputTokens) || 0;
+  const output = Number(outputTokens) || 0;
+  if (input <= 0 && output <= 0) return null;
+  return input * pricing.in + output * pricing.out;
+}
+
+// src/lib/pricingRegistry.mjs
+function estimateUsd3(opts) {
+  return estimateUsd(opts) ?? estimateUsd2(opts);
+}
+
 // src/lib/otlpEmit.mjs
 var DEFAULT_OTLP_ENDPOINT = "https://otel.observability.app.launchdarkly.com:4318";
 var EVENT_KEYS = {
@@ -14692,7 +14734,7 @@ function createOtlpEmitter({
     recordEstimatedCost(context, data, { input = 0, output = 0 } = {}) {
       if (!enabled || !sdkKey) return;
       try {
-        const usd = estimateUsd({
+        const usd = estimateUsd3({
           variationKey: data?.variationKey,
           inputTokens: input,
           outputTokens: output
@@ -14754,6 +14796,9 @@ var moduleDir = (() => {
 var PROJECT_ROOT = import_node_path2.default.resolve(moduleDir, "..", "..");
 var USER_CONFIG_PATH = import_node_path2.default.join(import_node_os2.default.homedir(), ".cursor", "ld-agentcontrol.json");
 var USER_STATE_DIR = import_node_path2.default.join(import_node_os2.default.homedir(), ".cursor", "ld-agentcontrol-state");
+var CLAUDE_CONFIG_PATH = import_node_path2.default.join(import_node_os2.default.homedir(), ".claude", "ld-agentcontrol.json");
+var CLAUDE_STATE_DIR = import_node_path2.default.join(import_node_os2.default.homedir(), ".claude", "ld-agentcontrol-state");
+var AGENT_MODEL_ATTR = "agentModel";
 var EVENT_KEYS2 = {
   durationTotal: "$ld:ai:duration:total",
   tokensTtf: "$ld:ai:tokens:ttf",
@@ -14785,17 +14830,23 @@ function loadBridgeConfig(configPath = import_node_path2.default.join(PROJECT_RO
   }
   return config;
 }
-function resolveRuntime() {
+function resolveRuntime({ provider } = {}) {
+  const providerHint = provider || process.env.LD_AGENTCONTROL_PROVIDER || "cursor";
+  const isClaude = providerHint === "claude-code" || providerHint === "claude";
+  const defaultUserConfig = isClaude ? CLAUDE_CONFIG_PATH : USER_CONFIG_PATH;
+  const defaultUserState = isClaude ? CLAUDE_STATE_DIR : USER_STATE_DIR;
+  const repoConfigPath = isClaude ? import_node_path2.default.join(PROJECT_ROOT, "adapters", "claude-code", "config.defaults.json") : import_node_path2.default.join(PROJECT_ROOT, "bridge.config.json");
   const explicit = process.env.LD_AGENTCONTROL_CONFIG;
   if (explicit !== "repo") {
-    const userPath = explicit || ((0, import_node_fs2.existsSync)(USER_CONFIG_PATH) ? USER_CONFIG_PATH : null);
+    const userPath = explicit || ((0, import_node_fs2.existsSync)(defaultUserConfig) ? defaultUserConfig : null);
     if (userPath) {
       const config = loadBridgeConfig(userPath);
       return {
         mode: "user",
+        provider: isClaude ? "claude-code" : "cursor",
         configPath: userPath,
         config,
-        stateDir: config.stateDir ?? USER_STATE_DIR,
+        stateDir: config.stateDir ?? defaultUserState,
         sdkKey: config.sdkKey ?? process.env.LD_SDK_KEY
       };
     }
@@ -14803,9 +14854,10 @@ function resolveRuntime() {
   loadEnv();
   return {
     mode: "repo",
-    configPath: import_node_path2.default.join(PROJECT_ROOT, "bridge.config.json"),
-    config: loadBridgeConfig(),
-    stateDir: import_node_path2.default.join(PROJECT_ROOT, ".state"),
+    provider: isClaude ? "claude-code" : "cursor",
+    configPath: repoConfigPath,
+    config: loadBridgeConfig(repoConfigPath),
+    stateDir: isClaude ? import_node_path2.default.join(PROJECT_ROOT, ".state", "claude-code") : import_node_path2.default.join(PROJECT_ROOT, ".state"),
     sdkKey: process.env.LD_SDK_KEY
   };
 }
@@ -14941,9 +14993,8 @@ async function createLdTracker({
     },
     /**
      * Evaluate an AI Config flag so LD serves the variation (targeting rules
-     * match the context's `cursorModel` attribute). Returns the flag value
-     * (with _ldMeta) or null when evaluation isn't possible — callers fall
-     * back to post-hoc attribution.
+     * match `agentModel`, with legacy `cursorModel` still supported). Returns
+     * the flag value (with _ldMeta) or null when evaluation isn't possible.
      */
     async evaluate(flagKey, context) {
       if (!initialized) return null;
@@ -14976,6 +15027,98 @@ function trackTokens(tracker, context, trackData, { total, input, output }) {
   if (input > 0) tracker.track(EVENT_KEYS2.tokensInput, context, trackData, input);
   if (output > 0) tracker.track(EVENT_KEYS2.tokensOutput, context, trackData, output);
   tracker.recordEstimatedCost?.(context, trackData, { input, output });
+}
+
+// src/lib/agentUsageEvent.mjs
+function normalizeAgentUsageEvent(partial = {}) {
+  const provider = partial.provider;
+  const model = partial.model ?? "";
+  const userKey = partial.userKey;
+  const source = partial.source;
+  if (!provider || typeof provider !== "string") {
+    throw new Error("AgentUsageEvent.provider is required");
+  }
+  if (!userKey || typeof userKey !== "string") {
+    throw new Error("AgentUsageEvent.userKey is required");
+  }
+  if (!source || typeof source !== "string") {
+    throw new Error("AgentUsageEvent.source is required");
+  }
+  const tokens = partial.tokens ? {
+    input: Number(partial.tokens.input) || 0,
+    output: Number(partial.tokens.output) || 0,
+    total: Number(partial.tokens.total) || 0,
+    cacheRead: Number(partial.tokens.cacheRead) || 0,
+    cacheWrite: Number(partial.tokens.cacheWrite) || 0
+  } : void 0;
+  return {
+    provider,
+    model: typeof model === "string" ? model : String(model ?? ""),
+    userKey,
+    startedAt: typeof partial.startedAt === "number" ? partial.startedAt : void 0,
+    endedAt: typeof partial.endedAt === "number" ? partial.endedAt : void 0,
+    outcome: partial.outcome ?? "success",
+    tokens,
+    costCents: typeof partial.costCents === "number" ? partial.costCents : void 0,
+    conversationId: partial.conversationId,
+    source,
+    configKey: partial.configKey,
+    variationKey: partial.variationKey,
+    runId: partial.runId,
+    version: partial.version,
+    providerName: partial.providerName ?? provider,
+    extra: partial.extra && typeof partial.extra === "object" ? { ...partial.extra } : {}
+  };
+}
+function toLdTrackCalls(partial) {
+  const event = normalizeAgentUsageEvent(partial);
+  if (event.outcome === "aborted") return [];
+  const calls = [];
+  let durationMs = null;
+  if (event.startedAt != null && event.endedAt != null) {
+    durationMs = Math.max(0, event.endedAt - event.startedAt);
+  } else if (typeof event.extra?.durationMs === "number") {
+    durationMs = event.extra.durationMs;
+  }
+  if (typeof durationMs === "number" && Number.isFinite(durationMs) && durationMs > 0) {
+    calls.push({
+      eventKey: EVENT_KEYS2.durationTotal,
+      metricValue: durationMs,
+      kind: "duration"
+    });
+  }
+  calls.push({
+    eventKey: event.outcome === "error" ? EVENT_KEYS2.generationError : EVENT_KEYS2.generationSuccess,
+    metricValue: 1,
+    kind: "generation"
+  });
+  const t = event.tokens;
+  if (t) {
+    const cacheWrite = t.cacheWrite || 0;
+    const cacheRead = t.cacheRead || 0;
+    const total = t.total > 0 ? t.total : t.input + t.output + cacheWrite + cacheRead;
+    if (total > 0 || t.input > 0 || t.output > 0) {
+      calls.push({
+        eventKey: EVENT_KEYS2.tokensTotal,
+        metricValue: total,
+        kind: "tokens",
+        tokens: { total, input: t.input, output: t.output }
+      });
+    }
+  }
+  return calls;
+}
+function applyAgentUsageEvent(tracker, context, trackData, partial) {
+  const event = normalizeAgentUsageEvent(partial);
+  const calls = toLdTrackCalls(event);
+  for (const call of calls) {
+    if (call.kind === "tokens") {
+      trackTokens(tracker, context, trackData, call.tokens);
+      continue;
+    }
+    tracker.track(call.eventKey, context, trackData, call.metricValue);
+  }
+  return { event, calls };
 }
 
 // src/hooks/cursor-hook.mjs
@@ -15110,6 +15253,7 @@ async function handleStop(payload) {
   const tracker = await createLdTracker({ sdkKey });
   const served = await tracker.evaluate(config.aiConfigKey, {
     ...context,
+    [AGENT_MODEL_ATTR]: variationKey,
     cursorModel: variationKey
   });
   const meta = served?._ldMeta;
@@ -15129,18 +15273,18 @@ async function handleStop(payload) {
       ...hasTokens ? { cacheWriteTokens: tokens.cacheWrite, cacheReadTokens: tokens.cacheRead } : {}
     }
   });
-  if (durationMs !== null) {
-    tracker.track(EVENT_KEYS2.durationTotal, context, trackData, durationMs);
-  }
-  const eventKey = status === "error" ? EVENT_KEYS2.generationError : EVENT_KEYS2.generationSuccess;
-  tracker.track(eventKey, context, trackData, 1);
-  if (hasTokens) {
-    trackTokens(tracker, context, trackData, {
-      total: tokens.input + tokens.output + tokens.cacheWrite + tokens.cacheRead,
-      input: tokens.input,
-      output: tokens.output
-    });
-  }
+  applyAgentUsageEvent(tracker, context, trackData, {
+    provider: "cursor",
+    providerName: trackData.providerName,
+    model: modelName,
+    userKey: context.key,
+    source: "hook",
+    outcome: status === "error" ? "error" : "success",
+    startedAt: startTs ?? void 0,
+    endedAt: startTs != null ? Date.now() : void 0,
+    tokens: hasTokens ? tokens : void 0,
+    conversationId: convId ?? void 0
+  });
   await tracker.close();
   if (status === "completed") {
     maybeSpawnJudge(config, payload, trackData, context.key, tracker.dryRun);

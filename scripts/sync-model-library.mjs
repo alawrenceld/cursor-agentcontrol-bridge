@@ -12,7 +12,7 @@
 // "Cursor" with Cursor's prices — which sometimes differ from the model
 // vendor's list prices (e.g. claude-4-sonnet-1m, claude-opus-4-7 fast mode).
 
-import { loadEnv, loadBridgeConfig } from '../src/lib/ldTrack.mjs';
+import { loadEnv, loadBridgeConfig, AGENT_MODEL_ATTR } from '../src/lib/ldTrack.mjs';
 import { PRICING_PER_M } from '../src/lib/cursorPricing.mjs';
 
 loadEnv();
@@ -136,10 +136,7 @@ if (config.judge?.configKey) {
   console.log(`✓ judge "${config.judge.configKey}" attached to ${attached} variations`);
 }
 
-// --- Targeting rules: one per variation, matching the hook's hotswapped ---
-// --- `cursorModel` context attribute, so LD *serves* the right variation ---
-// --- and events inherit the current variation version (required for the ---
-// --- version-sensitive cost join). Fallthrough stays `auto`.            ---
+// --- Targeting rules: agentModel (shared) + legacy cursorModel ---
 const ENV_KEY = process.env.LD_ENV_KEY ?? 'production';
 const targeting = await api('GET', `/${config.aiConfigKey}/targeting?env=${ENV_KEY}`);
 if (!targeting.ok) {
@@ -149,43 +146,65 @@ if (!targeting.ok) {
 const flagVariationIdsByKey = new Map(
   (targeting.json.variations ?? []).map((fv) => [fv.value?._ldMeta?.variationKey, fv._id]),
 );
-const existingRuleValues = new Set(
-  (targeting.json.environments?.[ENV_KEY]?.rules ?? []).flatMap((rule) =>
-    (rule.clauses ?? [])
-      .filter((c) => c.attribute === 'cursorModel')
-      .flatMap((c) => c.values),
-  ),
-);
+
+function existingValuesFor(attr) {
+  return new Set(
+    (targeting.json.environments?.[ENV_KEY]?.rules ?? []).flatMap((rule) =>
+      (rule.clauses ?? [])
+        .filter((c) => c.attribute === attr)
+        .flatMap((c) => c.values),
+    ),
+  );
+}
+
+const existingAgentModel = existingValuesFor(AGENT_MODEL_ATTR);
+const existingCursorModel = existingValuesFor('cursorModel');
 
 const instructions = [];
 for (const variationKey of variationKeys) {
-  if (existingRuleValues.has(variationKey)) continue;
   const variationId = flagVariationIdsByKey.get(variationKey);
   if (!variationId) {
     console.error(`! no flag variation id for "${variationKey}" — rule skipped`);
     failures += 1;
     continue;
   }
-  instructions.push({
-    kind: 'addRule',
-    description: `cursorModel == ${variationKey}`,
-    clauses: [
-      { contextKind: 'user', attribute: 'cursorModel', op: 'in', values: [variationKey] },
-    ],
-    variationId,
-  });
+  if (!existingAgentModel.has(variationKey)) {
+    instructions.push({
+      kind: 'addRule',
+      description: `${AGENT_MODEL_ATTR} == ${variationKey}`,
+      clauses: [
+        {
+          contextKind: 'user',
+          attribute: AGENT_MODEL_ATTR,
+          op: 'in',
+          values: [variationKey],
+        },
+      ],
+      variationId,
+    });
+  }
+  if (!existingCursorModel.has(variationKey)) {
+    instructions.push({
+      kind: 'addRule',
+      description: `cursorModel == ${variationKey}`,
+      clauses: [
+        { contextKind: 'user', attribute: 'cursorModel', op: 'in', values: [variationKey] },
+      ],
+      variationId,
+    });
+  }
 }
 if (instructions.length > 0) {
   const patched = await api('PATCH', `/${config.aiConfigKey}/targeting`, {
     environmentKey: ENV_KEY,
-    comment: 'sync-model-library: rule per model variation for evaluation-based attribution',
+    comment: 'sync-model-library: agentModel + cursorModel targeting rules',
     instructions,
   });
   if (!patched.ok) {
     console.error(`! targeting patch failed ${patched.status}: ${patched.text.slice(0, 400)}`);
     failures += 1;
   } else {
-    console.log(`✓ added ${instructions.length} targeting rules (cursorModel → variation)`);
+    console.log(`✓ added ${instructions.length} targeting rules (agentModel + cursorModel)`);
   }
 } else {
   console.log('targeting rules already in sync');

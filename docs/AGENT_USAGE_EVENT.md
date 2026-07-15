@@ -51,15 +51,22 @@ type AgentUsageEvent = {
 | Priority | Tool | Signal | Notes |
 |----------|------|--------|-------|
 | 1 (done) | Cursor | Hooks + Admin API | Reference adapter in this repo |
-| 2 | Claude Code | CLI hooks / transcripts / usage APIs | Closest parallel to Cursor hooks |
+| 2 (done) | Claude Code | CLI hooks + transcript deltas | See [claude-code-adapter.md](claude-code-adapter.md) |
 | 3 | VS Code Copilot | Extension / LM APIs | Tokens often incomplete |
 | 4 | Continue / Aider / Cline | Logs or OpenAI-compatible proxy | Prefer proxy + OTel |
 | forever | Generic | OTLP `gen_ai.*` | Best public standard |
 
+## In-repo helpers (v1)
+
+Implemented in [`src/lib/agentUsageEvent.mjs`](../src/lib/agentUsageEvent.mjs):
+
+- `normalizeAgentUsageEvent` / `toLdTrackCalls` / `applyAgentUsageEvent`
+
+Claude Code install: `npm run install:claude-hooks` after `setup:claude-ai-config` + `sync:claude-models`.
+
 ## Package extraction (later)
 
-When the second adapter lands, extract a tiny core package (suggested name
-`@agentcontrol/usage-core`) containing:
+Extract a tiny published package (suggested name `@agentcontrol/usage-core`) containing:
 
 - `AgentUsageEvent` types + validators
 - `appendUsageEvent` / `aggregateUsageEvents`

@@ -14430,6 +14430,48 @@ function estimateUsd({ variationKey, inputTokens = 0, outputTokens = 0 } = {}) {
   return input * pricing.in + output * pricing.out;
 }
 
+// src/lib/claudePricing.mjs
+var PRICING_PER_M2 = {
+  "claude-4-sonnet": { in: 3, out: 15 },
+  "claude-4-sonnet-1m": { in: 6, out: 22.5 },
+  "claude-4-5-haiku": { in: 1, out: 5 },
+  "claude-4-5-sonnet": { in: 3, out: 15 },
+  "claude-4-5-opus": { in: 5, out: 25 },
+  "claude-4-6-sonnet": { in: 3, out: 15 },
+  "claude-4-6-opus": { in: 5, out: 25 },
+  "claude-4-7-opus": { in: 5, out: 25 },
+  "claude-opus-4-7": { in: 15, out: 75 },
+  "claude-opus-4-8": { in: 5, out: 25 },
+  "claude-sonnet-4": { in: 3, out: 15 },
+  "claude-sonnet-4-5": { in: 3, out: 15 },
+  "claude-sonnet-4-6": { in: 3, out: 15 },
+  "claude-sonnet-5": { in: 3, out: 15 },
+  "claude-haiku-4-5": { in: 1, out: 5 },
+  "claude-3-5-haiku": { in: 0.8, out: 4 },
+  "claude-3-5-sonnet": { in: 3, out: 15 },
+  "claude-3-7-sonnet": { in: 3, out: 15 },
+  "claude-opus-4": { in: 15, out: 75 },
+  "claude-opus-4-1": { in: 15, out: 75 }
+};
+function perTokenPricing2(variationKey) {
+  const pricing = PRICING_PER_M2[variationKey];
+  if (!pricing) return null;
+  return { in: pricing.in / 1e6, out: pricing.out / 1e6 };
+}
+function estimateUsd2({ variationKey, inputTokens = 0, outputTokens = 0 } = {}) {
+  const pricing = perTokenPricing2(variationKey);
+  if (!pricing) return null;
+  const input = Number(inputTokens) || 0;
+  const output = Number(outputTokens) || 0;
+  if (input <= 0 && output <= 0) return null;
+  return input * pricing.in + output * pricing.out;
+}
+
+// src/lib/pricingRegistry.mjs
+function estimateUsd3(opts) {
+  return estimateUsd(opts) ?? estimateUsd2(opts);
+}
+
 // src/lib/otlpEmit.mjs
 var DEFAULT_OTLP_ENDPOINT = "https://otel.observability.app.launchdarkly.com:4318";
 var EVENT_KEYS = {
@@ -14693,7 +14735,7 @@ function createOtlpEmitter({
     recordEstimatedCost(context, data, { input = 0, output = 0 } = {}) {
       if (!enabled || !sdkKey) return;
       try {
-        const usd = estimateUsd({
+        const usd = estimateUsd3({
           variationKey: data?.variationKey,
           inputTokens: input,
           outputTokens: output
@@ -14755,6 +14797,8 @@ var moduleDir = (() => {
 var PROJECT_ROOT = import_node_path2.default.resolve(moduleDir, "..", "..");
 var USER_CONFIG_PATH = import_node_path2.default.join(import_node_os2.default.homedir(), ".cursor", "ld-agentcontrol.json");
 var USER_STATE_DIR = import_node_path2.default.join(import_node_os2.default.homedir(), ".cursor", "ld-agentcontrol-state");
+var CLAUDE_CONFIG_PATH = import_node_path2.default.join(import_node_os2.default.homedir(), ".claude", "ld-agentcontrol.json");
+var CLAUDE_STATE_DIR = import_node_path2.default.join(import_node_os2.default.homedir(), ".claude", "ld-agentcontrol-state");
 var EVENT_KEYS2 = {
   durationTotal: "$ld:ai:duration:total",
   tokensTtf: "$ld:ai:tokens:ttf",
@@ -14786,17 +14830,23 @@ function loadBridgeConfig(configPath = import_node_path2.default.join(PROJECT_RO
   }
   return config;
 }
-function resolveRuntime() {
+function resolveRuntime({ provider } = {}) {
+  const providerHint = provider || process.env.LD_AGENTCONTROL_PROVIDER || "cursor";
+  const isClaude = providerHint === "claude-code" || providerHint === "claude";
+  const defaultUserConfig = isClaude ? CLAUDE_CONFIG_PATH : USER_CONFIG_PATH;
+  const defaultUserState = isClaude ? CLAUDE_STATE_DIR : USER_STATE_DIR;
+  const repoConfigPath = isClaude ? import_node_path2.default.join(PROJECT_ROOT, "adapters", "claude-code", "config.defaults.json") : import_node_path2.default.join(PROJECT_ROOT, "bridge.config.json");
   const explicit = process.env.LD_AGENTCONTROL_CONFIG;
   if (explicit !== "repo") {
-    const userPath = explicit || ((0, import_node_fs2.existsSync)(USER_CONFIG_PATH) ? USER_CONFIG_PATH : null);
+    const userPath = explicit || ((0, import_node_fs2.existsSync)(defaultUserConfig) ? defaultUserConfig : null);
     if (userPath) {
       const config = loadBridgeConfig(userPath);
       return {
         mode: "user",
+        provider: isClaude ? "claude-code" : "cursor",
         configPath: userPath,
         config,
-        stateDir: config.stateDir ?? USER_STATE_DIR,
+        stateDir: config.stateDir ?? defaultUserState,
         sdkKey: config.sdkKey ?? process.env.LD_SDK_KEY
       };
     }
@@ -14804,9 +14854,10 @@ function resolveRuntime() {
   loadEnv();
   return {
     mode: "repo",
-    configPath: import_node_path2.default.join(PROJECT_ROOT, "bridge.config.json"),
-    config: loadBridgeConfig(),
-    stateDir: import_node_path2.default.join(PROJECT_ROOT, ".state"),
+    provider: isClaude ? "claude-code" : "cursor",
+    configPath: repoConfigPath,
+    config: loadBridgeConfig(repoConfigPath),
+    stateDir: isClaude ? import_node_path2.default.join(PROJECT_ROOT, ".state", "claude-code") : import_node_path2.default.join(PROJECT_ROOT, ".state"),
     sdkKey: process.env.LD_SDK_KEY
   };
 }
@@ -14930,9 +14981,8 @@ async function createLdTracker({
     },
     /**
      * Evaluate an AI Config flag so LD serves the variation (targeting rules
-     * match the context's `cursorModel` attribute). Returns the flag value
-     * (with _ldMeta) or null when evaluation isn't possible — callers fall
-     * back to post-hoc attribution.
+     * match `agentModel`, with legacy `cursorModel` still supported). Returns
+     * the flag value (with _ldMeta) or null when evaluation isn't possible.
      */
     async evaluate(flagKey, context) {
       if (!initialized) return null;

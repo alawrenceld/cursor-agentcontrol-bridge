@@ -5,14 +5,15 @@ Measure AI agent activity inside the Cursor IDE and feed it into LaunchDarkly:
 - **AI Config Monitoring** — team totals by model (generations, success/error, duration, tokens, LD-derived cost)
 - **Local Me ledger** — per-user view inside the IDE
 - **OTLP dual-emit** — per-user attributes in LaunchDarkly Observability
+- **Claude Code adapter** — second provider via CLI hooks ([docs/claude-code-adapter.md](docs/claude-code-adapter.md))
 
 ```
-Cursor IDE
+Cursor IDE / Claude Code
  ├─ hooks (real-time) ──► duration + generation success/error (+ ledger + OTLP)
- └─ Admin API (hourly) ──► input/output/total tokens   [optional, Teams+]
+ └─ Admin API (hourly) ──► input/output/total tokens   [optional, Cursor Teams+]
                 │
                 ▼
-   LD server SDK track()  →  AI Config "cursor-agent-usage"  →  Monitoring (All)
+   LD server SDK track()  →  AI Config (cursor-agent-usage | claude-code-usage)
    OTLP /v1/metrics|traces →  Observability (user.email × model)
 ```
 
@@ -95,6 +96,7 @@ npm run poller:dry     # Admin API only, no LD writes
 - Sidebar **All** / **Me**: [SETUP.md](SETUP.md)
 - Me tokens only from this machine’s ledger: [docs/SPIKE-me-remote.md](docs/SPIKE-me-remote.md)
 - OTLP per-user reporting: [docs/OTLP-DUAL-EMIT.md](docs/OTLP-DUAL-EMIT.md)
+- Claude Code hooks: [docs/claude-code-adapter.md](docs/claude-code-adapter.md) (`npm run install:claude-hooks`)
 - Exec CSV report: `npm run report:export && npm run report:serve` ([report/](report/))
 - Multi-provider roadmap: [docs/AGENT_USAGE_EVENT.md](docs/AGENT_USAGE_EVENT.md)
 
@@ -111,16 +113,19 @@ npm run poller:dry     # Admin API only, no LD writes
 | Path | Purpose |
 |---|---|
 | [SETUP.md](SETUP.md) | Extension install + LD credentials |
-| `src/hooks/cursor-hook.mjs` | Hook entry (`beforeSubmitPrompt` + `stop`) |
+| `src/hooks/cursor-hook.mjs` | Cursor hook (`beforeSubmitPrompt` + `stop`) |
+| `src/hooks/claude-code-hook.mjs` | Claude Code hook (UserPromptSubmit / Stop / StopFailure) |
+| `adapters/claude-code/` | Claude defaults + install path |
 | `src/poller/poll-usage-events.mjs` | Admin API → token events |
 | `src/lib/ldTrack.mjs` | LD `track()` + ledger + OTLP flush |
+| `src/lib/agentUsageEvent.mjs` | Provider-agnostic → `$ld:ai:*` calls |
 | `src/lib/otlpEmit.mjs` | OTLP/HTTP JSON dual-emit |
 | `src/lib/usageLedger.mjs` | Local Me ledger |
 | `extension/` | VSIX: self-installing hook + All/Me UI |
 | `bridge.config.json` | Models map, otlp, emails (seeds user config) |
-| `scripts/setup-ai-config.mjs` / `sync-model-library.mjs` | Provision AI Config + pricing |
+| `scripts/setup-*-ai-config` / `sync:*-models` | Provision AI Config + pricing |
 | `report/` | Standalone ledger report UI |
-| `docs/` | OTLP, spikes, AgentUsageEvent |
+| `docs/` | OTLP, Claude Code, AgentUsageEvent |
 | `test/` | Unit tests |
 
 After adding model variations, run `npm run sync:models` or Monitoring estimated cost stays `$0`.

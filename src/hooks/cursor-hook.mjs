@@ -28,9 +28,9 @@ import {
   buildTrackData,
   userContext,
   createLdTracker,
-  trackTokens,
-  EVENT_KEYS,
+  AGENT_MODEL_ATTR,
 } from '../lib/ldTrack.mjs';
+import { applyAgentUsageEvent } from '../lib/agentUsageEvent.mjs';
 
 const STALE_PENDING_MS = 24 * 60 * 60 * 1000;
 
@@ -210,8 +210,10 @@ async function handleStop(payload) {
   // version — which is what the Monitoring tab's cost join is keyed on.
   // Post-hoc attribution remains as the offline/no-rule fallback, but those
   // events only price if the claimed version has a model attached.
+  // agentModel is the shared targeting attr; cursorModel kept for existing rules.
   const served = await tracker.evaluate(config.aiConfigKey, {
     ...context,
+    [AGENT_MODEL_ATTR]: variationKey,
     cursorModel: variationKey,
   });
   const meta = served?._ldMeta;
@@ -234,20 +236,20 @@ async function handleStop(payload) {
         : {}),
     },
   });
-  if (durationMs !== null) {
-    tracker.track(EVENT_KEYS.durationTotal, context, trackData, durationMs);
-  }
-  const eventKey = status === 'error' ? EVENT_KEYS.generationError : EVENT_KEYS.generationSuccess;
-  tracker.track(eventKey, context, trackData, 1);
-  if (hasTokens) {
-    // Same convention as the poller: total includes cache tokens, input/output
-    // stay raw so LD's derived cost isn't inflated by cache reads.
-    trackTokens(tracker, context, trackData, {
-      total: tokens.input + tokens.output + tokens.cacheWrite + tokens.cacheRead,
-      input: tokens.input,
-      output: tokens.output,
-    });
-  }
+
+  applyAgentUsageEvent(tracker, context, trackData, {
+    provider: 'cursor',
+    providerName: trackData.providerName,
+    model: modelName,
+    userKey: context.key,
+    source: 'hook',
+    outcome: status === 'error' ? 'error' : 'success',
+    startedAt: startTs ?? undefined,
+    endedAt: startTs != null ? Date.now() : undefined,
+    tokens: hasTokens ? tokens : undefined,
+    conversationId: convId ?? undefined,
+  });
+
   await tracker.close();
 
   if (status === 'completed') {

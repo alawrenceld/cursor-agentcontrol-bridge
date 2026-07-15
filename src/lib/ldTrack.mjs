@@ -29,6 +29,11 @@ export const PROJECT_ROOT = path.resolve(moduleDir, '..', '..');
 
 export const USER_CONFIG_PATH = path.join(os.homedir(), '.cursor', 'ld-agentcontrol.json');
 export const USER_STATE_DIR = path.join(os.homedir(), '.cursor', 'ld-agentcontrol-state');
+export const CLAUDE_CONFIG_PATH = path.join(os.homedir(), '.claude', 'ld-agentcontrol.json');
+export const CLAUDE_STATE_DIR = path.join(os.homedir(), '.claude', 'ld-agentcontrol-state');
+
+/** Context attribute used for evaluation-based variation targeting (both providers). */
+export const AGENT_MODEL_ATTR = 'agentModel';
 
 export const EVENT_KEYS = {
   durationTotal: '$ld:ai:duration:total',
@@ -69,27 +74,39 @@ export function loadBridgeConfig(configPath = path.join(PROJECT_ROOT, 'bridge.co
 }
 
 /**
- * Resolve where config, state, and the SDK key come from. Two modes:
+ * Resolve where config, state, and the SDK key come from.
  *
- * - **User mode** (extension-managed all-in-one): `~/.cursor/ld-agentcontrol.json`
- *   holds the bridge config plus `sdkKey` (and optional `stateDir`), so the
- *   hook works standalone with no checkout of this repo. An explicit path in
- *   `LD_AGENTCONTROL_CONFIG` overrides the default location.
- * - **Repo mode**: bridge.config.json + .env in this checkout, state under
- *   `.state/`. Forced with `LD_AGENTCONTROL_CONFIG=repo` (used by tests so a
- *   developer's user config never leaks into fixtures).
+ * @param {{ provider?: 'cursor'|'claude-code' }} [opts]
+ *   `provider` selects default user-config paths (`~/.cursor/…` vs `~/.claude/…`).
+ *   Also honored via `LD_AGENTCONTROL_PROVIDER`.
+ *
+ * - **User mode**: provider-specific `ld-agentcontrol.json` (+ optional `sdkKey` /
+ *   `stateDir`). Explicit `LD_AGENTCONTROL_CONFIG=/path` overrides.
+ * - **Repo mode**: `LD_AGENTCONTROL_CONFIG=repo` — Cursor uses `bridge.config.json`,
+ *   Claude Code uses `adapters/claude-code/config.defaults.json`.
  */
-export function resolveRuntime() {
+export function resolveRuntime({ provider } = {}) {
+  const providerHint =
+    provider || process.env.LD_AGENTCONTROL_PROVIDER || 'cursor';
+  const isClaude = providerHint === 'claude-code' || providerHint === 'claude';
+  const defaultUserConfig = isClaude ? CLAUDE_CONFIG_PATH : USER_CONFIG_PATH;
+  const defaultUserState = isClaude ? CLAUDE_STATE_DIR : USER_STATE_DIR;
+  const repoConfigPath = isClaude
+    ? path.join(PROJECT_ROOT, 'adapters', 'claude-code', 'config.defaults.json')
+    : path.join(PROJECT_ROOT, 'bridge.config.json');
+
   const explicit = process.env.LD_AGENTCONTROL_CONFIG;
   if (explicit !== 'repo') {
-    const userPath = explicit || (existsSync(USER_CONFIG_PATH) ? USER_CONFIG_PATH : null);
+    const userPath =
+      explicit || (existsSync(defaultUserConfig) ? defaultUserConfig : null);
     if (userPath) {
       const config = loadBridgeConfig(userPath);
       return {
         mode: 'user',
+        provider: isClaude ? 'claude-code' : 'cursor',
         configPath: userPath,
         config,
-        stateDir: config.stateDir ?? USER_STATE_DIR,
+        stateDir: config.stateDir ?? defaultUserState,
         sdkKey: config.sdkKey ?? process.env.LD_SDK_KEY,
       };
     }
@@ -97,9 +114,12 @@ export function resolveRuntime() {
   loadEnv();
   return {
     mode: 'repo',
-    configPath: path.join(PROJECT_ROOT, 'bridge.config.json'),
-    config: loadBridgeConfig(),
-    stateDir: path.join(PROJECT_ROOT, '.state'),
+    provider: isClaude ? 'claude-code' : 'cursor',
+    configPath: repoConfigPath,
+    config: loadBridgeConfig(repoConfigPath),
+    stateDir: isClaude
+      ? path.join(PROJECT_ROOT, '.state', 'claude-code')
+      : path.join(PROJECT_ROOT, '.state'),
     sdkKey: process.env.LD_SDK_KEY,
   };
 }
@@ -274,9 +294,8 @@ export async function createLdTracker({
     },
     /**
      * Evaluate an AI Config flag so LD serves the variation (targeting rules
-     * match the context's `cursorModel` attribute). Returns the flag value
-     * (with _ldMeta) or null when evaluation isn't possible — callers fall
-     * back to post-hoc attribution.
+     * match `agentModel`, with legacy `cursorModel` still supported). Returns
+     * the flag value (with _ldMeta) or null when evaluation isn't possible.
      */
     async evaluate(flagKey, context) {
       if (!initialized) return null;

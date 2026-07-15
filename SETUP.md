@@ -10,6 +10,10 @@ Records Cursor agent runs into LaunchDarkly and shows usage in the IDE:
 
 Most people should install the **extension** (below). The root [README.md](README.md) covers optional repo-mode hooks + Admin API poller.
 
+**Claude Code (second provider):** see [docs/claude-code-adapter.md](docs/claude-code-adapter.md) —
+`npm run install:claude-hooks` after `setup:claude-ai-config` / `sync:claude-models`. Uses AI Config
+`claude-code-usage` (separate from `cursor-agent-usage`).
+
 ---
 
 ## LaunchDarkly credentials (what each one is)

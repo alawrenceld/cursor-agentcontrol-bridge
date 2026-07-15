@@ -8,10 +8,21 @@ import { resolveRuntime, PROJECT_ROOT } from '../src/lib/ldTrack.mjs';
 
 test('LD_AGENTCONTROL_CONFIG=repo forces repo mode', () => {
   process.env.LD_AGENTCONTROL_CONFIG = 'repo';
+  delete process.env.LD_AGENTCONTROL_PROVIDER;
   const runtime = resolveRuntime();
   assert.equal(runtime.mode, 'repo');
   assert.equal(runtime.stateDir, path.join(PROJECT_ROOT, '.state'));
   assert.equal(runtime.config.aiConfigKey, 'cursor-agent-usage');
+  delete process.env.LD_AGENTCONTROL_CONFIG;
+});
+
+test('claude-code provider repo mode uses adapter defaults', () => {
+  process.env.LD_AGENTCONTROL_CONFIG = 'repo';
+  const runtime = resolveRuntime({ provider: 'claude-code' });
+  assert.equal(runtime.mode, 'repo');
+  assert.equal(runtime.provider, 'claude-code');
+  assert.equal(runtime.config.aiConfigKey, 'claude-code-usage');
+  assert.equal(runtime.stateDir, path.join(PROJECT_ROOT, '.state', 'claude-code'));
   delete process.env.LD_AGENTCONTROL_CONFIG;
 });
 

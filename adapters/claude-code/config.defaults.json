@@ -1,0 +1,30 @@
+{
+  "aiConfigKey": "claude-code-usage",
+  "aiConfigVersion": 1,
+  "providerName": "claude-code",
+  "models": {
+    "claude-opus-4-8": "claude-opus-4-8",
+    "claude-opus-4-7": "claude-opus-4-7",
+    "claude-opus-4-1": "claude-opus-4-1",
+    "claude-opus-4": "claude-opus-4",
+    "claude-sonnet-4-6": "claude-sonnet-4-6",
+    "claude-sonnet-4-5": "claude-sonnet-4-5",
+    "claude-sonnet-4": "claude-sonnet-4",
+    "claude-sonnet-5": "claude-sonnet-5",
+    "claude-haiku-4-5": "claude-haiku-4-5",
+    "claude-4-5-haiku": "claude-4-5-haiku",
+    "claude-4-5-sonnet": "claude-4-5-sonnet",
+    "claude-4-5-opus": "claude-4-5-opus",
+    "claude-4-6-sonnet": "claude-4-6-sonnet",
+    "claude-4-6-opus": "claude-4-6-opus",
+    "claude-4-7-opus": "claude-4-7-opus",
+    "claude-4-sonnet": "claude-4-sonnet",
+    "claude-3-7-sonnet": "claude-3-7-sonnet",
+    "claude-3-5-sonnet": "claude-3-5-sonnet",
+    "claude-3-5-haiku": "claude-3-5-haiku"
+  },
+  "fallbackVariation": null,
+  "otlp": {
+    "enabled": true
+  }
+}
