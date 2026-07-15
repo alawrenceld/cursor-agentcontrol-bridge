@@ -2,3 +2,6 @@ node_modules/
 .state/
 .env
 *.log
+extension/*.vsix
+.DS_Store
+report/data/usage-summary.json

@@ -61,7 +61,7 @@
     "maxInputChars": 60000,
     "timeoutMs": 240000
   },
-  "hookUserEmail": "ttotenberg@launchdarkly.com",
-  "userEmails": ["ttotenberg@launchdarkly.com"],
+  "hookUserEmail": "",
+  "userEmails": [],
   "emitGenerationsFromPoller": false
 }

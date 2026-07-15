@@ -1,9 +1,10 @@
 {
   "name": "cursor-agentcontrol-bridge",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Bridge Cursor IDE agent activity (hooks + Admin API) into LaunchDarkly AI Config Monitoring",
   "type": "module",
   "private": true,
+  "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -15,7 +16,10 @@
     "poller:loop": "node src/poller/poll-usage-events.mjs --loop",
     "setup:ai-config": "node scripts/setup-ai-config.mjs",
     "sync:models": "node scripts/sync-model-library.mjs",
-    "build:hook": "node scripts/build-hook.mjs"
+    "build:hook": "node scripts/build-hook.mjs",
+    "spike:me-remote": "node scripts/spike-me-remote.mjs",
+    "report:export": "node scripts/export-usage-summary.mjs",
+    "report:serve": "node scripts/serve-report.mjs"
   },
   "dependencies": {
     "@launchdarkly/node-server-sdk": "^9.11.3"

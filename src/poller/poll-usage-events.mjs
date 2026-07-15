@@ -17,7 +17,7 @@ import {
   PROJECT_ROOT,
   EVENT_KEYS,
   loadEnv,
-  loadBridgeConfig,
+  resolveRuntime,
   resolveVariation,
   buildTrackData,
   userContext,
@@ -146,7 +146,8 @@ export async function fetchUsageEvents({ adminKey, startDate, endDate }) {
 
 export async function pollOnce({ dryRun, since }) {
   loadEnv();
-  const config = loadBridgeConfig();
+  const runtime = resolveRuntime();
+  const { config, stateDir, sdkKey } = runtime;
   const adminKey = process.env.CURSOR_ADMIN_KEY;
   if (!adminKey) throw new Error('CURSOR_ADMIN_KEY is not set');
 
@@ -167,7 +168,11 @@ export async function pollOnce({ dryRun, since }) {
       ? new Set(config.userEmails.map((e) => e.toLowerCase()))
       : null;
 
-  const tracker = await createLdTracker({ dryRun: dryRun || process.env.DRY_RUN === '1' });
+  const tracker = await createLdTracker({
+    dryRun: dryRun || process.env.DRY_RUN === '1',
+    sdkKey,
+    stateDir,
+  });
   const stats = { emitted: 0, deduped: 0, filtered: 0, unmappedModel: 0, noTokens: 0 };
   let maxTs = state.lastSeenTs ?? 0;
   const freshHashes = {};

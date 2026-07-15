@@ -1,0 +1,135 @@
+{
+  "exportedAt": "2026-07-15T16:19:20.960Z",
+  "from": "2026-06-15T16:19:20.957Z",
+  "to": "2026-07-15T16:19:20.957Z",
+  "days": 30,
+  "ledger": "(sample)",
+  "eventCount": 5,
+  "totals": {
+    "durationMs": 120000,
+    "generationCount": 2,
+    "generationErrorCount": 0,
+    "generationSuccessCount": 2,
+    "inputCost": 0,
+    "inputTokens": 0,
+    "outputCost": 0,
+    "outputTokens": 0,
+    "thumbsDown": 0,
+    "thumbsUp": 0,
+    "timeToFirstTokenMs": 0,
+    "totalTokens": 2850000
+  },
+  "byVariation": [
+    {
+      "variationKey": "composer-2-5-fast",
+      "metrics": {
+        "durationMs": 120000,
+        "generationCount": 1,
+        "generationErrorCount": 0,
+        "generationSuccessCount": 1,
+        "inputCost": 0,
+        "inputTokens": 0,
+        "outputCost": 0,
+        "outputTokens": 0,
+        "thumbsDown": 0,
+        "thumbsUp": 0,
+        "timeToFirstTokenMs": 0,
+        "totalTokens": 850000
+      }
+    },
+    {
+      "variationKey": "claude-opus-4-8",
+      "metrics": {
+        "durationMs": 0,
+        "generationCount": 1,
+        "generationErrorCount": 0,
+        "generationSuccessCount": 1,
+        "inputCost": 0,
+        "inputTokens": 0,
+        "outputCost": 0,
+        "outputTokens": 0,
+        "thumbsDown": 0,
+        "thumbsUp": 0,
+        "timeToFirstTokenMs": 0,
+        "totalTokens": 2000000
+      }
+    }
+  ],
+  "users": [
+    {
+      "userKey": "alex@example.com",
+      "provider": "cursor",
+      "totals": {
+        "durationMs": 120000,
+        "generationCount": 1,
+        "generationErrorCount": 0,
+        "generationSuccessCount": 1,
+        "inputCost": 0,
+        "inputTokens": 0,
+        "outputCost": 0,
+        "outputTokens": 0,
+        "thumbsDown": 0,
+        "thumbsUp": 0,
+        "timeToFirstTokenMs": 0,
+        "totalTokens": 850000
+      },
+      "byVariation": [
+        {
+          "variationKey": "composer-2-5-fast",
+          "metrics": {
+            "durationMs": 120000,
+            "generationCount": 1,
+            "generationErrorCount": 0,
+            "generationSuccessCount": 1,
+            "inputCost": 0,
+            "inputTokens": 0,
+            "outputCost": 0,
+            "outputTokens": 0,
+            "thumbsDown": 0,
+            "thumbsUp": 0,
+            "timeToFirstTokenMs": 0,
+            "totalTokens": 850000
+          }
+        }
+      ]
+    },
+    {
+      "userKey": "tom@example.com",
+      "provider": "cursor",
+      "totals": {
+        "durationMs": 0,
+        "generationCount": 1,
+        "generationErrorCount": 0,
+        "generationSuccessCount": 1,
+        "inputCost": 0,
+        "inputTokens": 0,
+        "outputCost": 0,
+        "outputTokens": 0,
+        "thumbsDown": 0,
+        "thumbsUp": 0,
+        "timeToFirstTokenMs": 0,
+        "totalTokens": 2000000
+      },
+      "byVariation": [
+        {
+          "variationKey": "claude-opus-4-8",
+          "metrics": {
+            "durationMs": 0,
+            "generationCount": 1,
+            "generationErrorCount": 0,
+            "generationSuccessCount": 1,
+            "inputCost": 0,
+            "inputTokens": 0,
+            "outputCost": 0,
+            "outputTokens": 0,
+            "thumbsDown": 0,
+            "thumbsUp": 0,
+            "timeToFirstTokenMs": 0,
+            "totalTokens": 2000000
+          }
+        }
+      ]
+    }
+  ],
+  "sample": true
+}

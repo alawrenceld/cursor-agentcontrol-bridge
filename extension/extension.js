@@ -21,9 +21,32 @@ const {
   setupHealth,
 } = require('./lib/hookInstall');
 const { readScores, aggregateScores } = require('./lib/judgeScores');
+const {
+  DEFAULT_STATE_DIR,
+  readUsageEvents,
+  aggregateUsageEvents,
+  ledgerPath,
+} = require('./lib/usageLedger');
 
 const TOKEN_SECRET_KEY = 'ldAgentControl.apiToken';
 const RANGE_STATE_KEY = 'ldAgentControl.rangeKey';
+const SCOPE_STATE_KEY = 'ldAgentControl.scopeKey';
+const SCOPE_PRESETS = [
+  { key: 'all', label: 'All' },
+  { key: 'me', label: 'Me' },
+];
+
+/** Email used for Me filter + hook attribution. */
+function resolveMeIdentity() {
+  const cfg = readUserConfig();
+  const email = (cfg?.hookUserEmail || cfg?.userEmails?.[0] || '').trim();
+  return email;
+}
+
+function userStateDir() {
+  const cfg = readUserConfig();
+  return cfg?.stateDir || DEFAULT_STATE_DIR;
+}
 
 let pollTimer;
 
@@ -88,6 +111,16 @@ function ensureWritePath(context) {
         if (pick) vscode.commands.executeCommand('ldAgentControl.setSdkKey');
       });
   }
+  if (!resolveMeIdentity()) {
+    vscode.window
+      .showInformationMessage(
+        'AgentControl: set your email so Me filtering and LD attribution match your account.',
+        'Set Email',
+      )
+      .then((pick) => {
+        if (pick) vscode.commands.executeCommand('ldAgentControl.setIdentity');
+      });
+  }
 }
 
 function activate(context) {
@@ -99,11 +132,14 @@ function activate(context) {
 
   const state = {
     rangeKey: context.globalState.get(RANGE_STATE_KEY, '24h'),
+    scopeKey: context.globalState.get(SCOPE_STATE_KEY, 'all'),
+    meIdentity: resolveMeIdentity(),
     data: null,
     error: null,
     fetchedAt: null,
     loading: false,
     tokenMissing: false,
+    identityMissing: false,
   };
 
   let webviewView = null;
@@ -112,20 +148,31 @@ function activate(context) {
     webviewView?.webview.postMessage({
       type: 'state',
       presets: RANGE_PRESETS,
+      scopes: SCOPE_PRESETS,
       rangeKey: state.rangeKey,
+      scopeKey: state.scopeKey,
+      meIdentity: state.meIdentity,
       data: state.data,
       error: state.error,
       fetchedAt: state.fetchedAt,
       loading: state.loading,
       tokenMissing: state.tokenMissing,
+      identityMissing: state.identityMissing,
     });
   }
 
   function renderStatusBar() {
-    if (state.tokenMissing) {
+    if (state.scopeKey === 'all' && state.tokenMissing) {
       statusBar.text = '$(key) Set LD token';
-      statusBar.tooltip = 'AgentControl: set a LaunchDarkly API token to see Cursor usage metrics';
+      statusBar.tooltip = 'AgentControl: set a LaunchDarkly API token for the All (team) view';
       statusBar.command = 'ldAgentControl.setToken';
+      statusBar.show();
+      return;
+    }
+    if (state.scopeKey === 'me' && state.identityMissing) {
+      statusBar.text = '$(mail) Set your email';
+      statusBar.tooltip = 'AgentControl: set your email for the Me filter';
+      statusBar.command = 'ldAgentControl.setIdentity';
       statusBar.show();
       return;
     }
@@ -142,12 +189,18 @@ function activate(context) {
       return;
     }
     const totals = state.data.totals;
+    const scopeLabel = state.scopeKey === 'me' ? 'Me' : 'All';
     statusBar.text =
-      `$(pulse) ${formatCompact(totals.generationCount)} gen · ` +
+      `$(pulse) ${scopeLabel} · ${formatCompact(totals.generationCount)} gen · ` +
       `${formatCompact(totals.totalTokens)} tok · ${costDisplay(totals, totals.estCost)}`;
     const preset = RANGE_PRESETS.find((p) => p.key === state.rangeKey);
     const tooltip = new vscode.MarkdownString(undefined, true);
-    tooltip.appendMarkdown(`**Cursor agent usage — ${preset.label.toLowerCase()}**\n\n`);
+    tooltip.appendMarkdown(
+      `**Cursor agent usage — ${scopeLabel} · ${preset.label.toLowerCase()}**\n\n`,
+    );
+    if (state.scopeKey === 'me') {
+      tooltip.appendMarkdown(`Identity: \`${state.meIdentity}\` (local ledger)\n\n`);
+    }
     tooltip.appendMarkdown('| Model | Gen | Tokens | Cost |\n|---|---|---|---|\n');
     for (const row of state.data.byVariation) {
       const m = row.metrics;
@@ -162,47 +215,80 @@ function activate(context) {
     statusBar.show();
   }
 
+  function attachCostsAndJudge(data, costBasis, configKey) {
+    for (const row of data.byVariation ?? []) {
+      row.estCost = estimateCost(row.metrics, costBasis[row.variationKey]);
+    }
+    data.totals.estCost = (data.byVariation ?? []).reduce(
+      (sum, row) => sum + (row.estCost ?? 0),
+      0,
+    );
+    const judged = aggregateScores(readScores(), { configKey, from: data.from, to: data.to });
+    for (const row of data.byVariation ?? []) {
+      row.judgeScore = judged.byVariation[row.variationKey] ?? { avg: null, count: 0 };
+    }
+    data.totals.judgeScore = judged.totals;
+  }
+
   async function refresh() {
     const token = await context.secrets.get(TOKEN_SECRET_KEY);
     state.tokenMissing = !token;
-    if (!token) {
+    state.meIdentity = resolveMeIdentity();
+    state.identityMissing = state.scopeKey === 'me' && !state.meIdentity;
+
+    if (state.scopeKey === 'all' && !token) {
+      state.data = null;
+      state.error = null;
       renderStatusBar();
       pushToWebview();
       return;
     }
+    if (state.identityMissing) {
+      state.data = null;
+      state.error = null;
+      renderStatusBar();
+      pushToWebview();
+      return;
+    }
+
     const { projectKey, configKey, env } = getConfig();
     const preset = RANGE_PRESETS.find((p) => p.key === state.rangeKey) ?? RANGE_PRESETS[1];
     state.loading = true;
     pushToWebview();
     try {
       const to = Date.now();
-      const [data, costBasis] = await Promise.all([
-        fetchAiConfigMetrics({
+      const from = to - preset.hours * 3600_000;
+      let costBasis = {};
+      if (token && projectKey) {
+        costBasis = await fetchCostBasis({ token, projectKey, configKey }).catch(() => ({}));
+      }
+
+      let data;
+      if (state.scopeKey === 'me') {
+        const events = readUsageEvents(ledgerPath(userStateDir()));
+        data = aggregateUsageEvents(events, {
+          userKey: state.meIdentity,
+          configKey,
+          from,
+          to,
+        });
+      } else {
+        if (!projectKey) {
+          throw new Error(
+            'Set ldAgentControl.projectKey in Settings to your LaunchDarkly project.',
+          );
+        }
+        data = await fetchAiConfigMetrics({
           token,
           projectKey,
           configKey,
           env,
-          from: to - preset.hours * 3600_000,
+          from,
           to,
-        }),
-        fetchCostBasis({ token, projectKey, configKey }).catch(() => ({})),
-      ]);
-      // Attach client-side estimates: the beta metrics API reports $0 cost
-      // even for events the LD UI prices, so the UI falls back to ≈tokens×price.
-      for (const row of data.byVariation ?? []) {
-        row.estCost = estimateCost(row.metrics, costBasis[row.variationKey]);
+        });
       }
-      data.totals.estCost = (data.byVariation ?? []).reduce(
-        (sum, row) => sum + (row.estCost ?? 0),
-        0,
-      );
-      // Judge scores come from the worker's local record (the metrics API
-      // doesn't expose judge metrics yet).
-      const judged = aggregateScores(readScores(), { configKey, from: data.from, to: data.to });
-      for (const row of data.byVariation ?? []) {
-        row.judgeScore = judged.byVariation[row.variationKey] ?? { avg: null, count: 0 };
-      }
-      data.totals.judgeScore = judged.totals;
+
+      attachCostsAndJudge(data, costBasis, configKey);
       state.data = data;
       state.error = null;
       state.fetchedAt = Date.now();
@@ -246,6 +332,27 @@ function activate(context) {
         vscode.window.showInformationMessage('AgentControl: SDK key saved to ld-agentcontrol.json');
       }
     }),
+    vscode.commands.registerCommand('ldAgentControl.setIdentity', async () => {
+      const current = resolveMeIdentity();
+      const email = await vscode.window.showInputBox({
+        title: 'Your email (Me filter + LaunchDarkly user context key)',
+        ignoreFocusOut: true,
+        value: current,
+        placeHolder: 'you@example.com',
+        validateInput: (v) =>
+          v && v.includes('@') ? undefined : 'Enter an email address used for attribution',
+      });
+      if (email) {
+        const trimmed = email.trim();
+        upsertUserConfig(configDefaults(context), {
+          hookUserEmail: trimmed,
+          userEmails: [trimmed],
+        });
+        state.meIdentity = trimmed;
+        vscode.window.showInformationMessage(`AgentControl: identity set to ${trimmed}`);
+        await refresh();
+      }
+    }),
     vscode.commands.registerCommand('ldAgentControl.openHookConfig', async () => {
       upsertUserConfig(configDefaults(context));
       const doc = await vscode.workspace.openTextDocument(USER_CONFIG_PATH);
@@ -275,11 +382,19 @@ function activate(context) {
               await context.globalState.update(RANGE_STATE_KEY, msg.key);
               refresh();
               break;
+            case 'setScope':
+              state.scopeKey = msg.key === 'me' ? 'me' : 'all';
+              await context.globalState.update(SCOPE_STATE_KEY, state.scopeKey);
+              refresh();
+              break;
             case 'refresh':
               refresh();
               break;
             case 'setToken':
               vscode.commands.executeCommand('ldAgentControl.setToken');
+              break;
+            case 'setIdentity':
+              vscode.commands.executeCommand('ldAgentControl.setIdentity');
               break;
             case 'openMonitoring': {
               const { projectKey, configKey, env } = getConfig();
@@ -492,10 +607,20 @@ function getHtml(webview) {
   function render(s) {
     lastState = s;
     const filters = document.getElementById('filters');
-    filters.innerHTML = s.presets.map((p) =>
-      '<button data-key="' + esc(p.key) + '"' +
-      (p.key === s.rangeKey ? ' class="selected"' : '') + '>' + esc(p.label) + '</button>'
-    ).join('') + '<span class="spacer"></span><button data-act="refresh" title="Refresh">↻</button>';
+    const scopes = s.scopes || [{ key: 'all', label: 'All' }, { key: 'me', label: 'Me' }];
+    filters.innerHTML =
+      scopes.map((p) =>
+        '<button data-scope="' + esc(p.key) + '"' +
+        (p.key === s.scopeKey ? ' class="selected"' : '') + '>' + esc(p.label) + '</button>'
+      ).join('') +
+      '<span class="muted" style="margin:0 4px">|</span>' +
+      s.presets.map((p) =>
+        '<button data-key="' + esc(p.key) + '"' +
+        (p.key === s.rangeKey ? ' class="selected"' : '') + '>' + esc(p.label) + '</button>'
+      ).join('') +
+      '<span class="spacer"></span><button data-act="refresh" title="Refresh">↻</button>';
+    filters.querySelectorAll('button[data-scope]').forEach((b) =>
+      b.addEventListener('click', () => vscode.postMessage({ type: 'setScope', key: b.dataset.scope })));
     filters.querySelectorAll('button[data-key]').forEach((b) =>
       b.addEventListener('click', () => vscode.postMessage({ type: 'setRange', key: b.dataset.key })));
     filters.querySelector('[data-act=refresh]')
@@ -504,11 +629,20 @@ function getHtml(webview) {
     const content = document.getElementById('content');
     content.classList.toggle('stale', s.loading);
 
-    if (s.tokenMissing) {
-      content.innerHTML = '<div class="empty">No LaunchDarkly API token configured. ' +
-        '<a id="set-token">Set token</a></div>';
+    if (s.scopeKey === 'all' && s.tokenMissing) {
+      content.innerHTML = '<div class="empty">No LaunchDarkly API token configured for the All view. ' +
+        '<a id="set-token">Set token</a> — or switch to <strong>Me</strong> (local ledger).</div>';
       document.getElementById('set-token')
         .addEventListener('click', () => vscode.postMessage({ type: 'setToken' }));
+      document.getElementById('updated').textContent = '';
+      return;
+    }
+
+    if (s.identityMissing) {
+      content.innerHTML = '<div class="empty">Set your email to use the Me filter. ' +
+        '<a id="set-identity">Set email</a></div>';
+      document.getElementById('set-identity')
+        .addEventListener('click', () => vscode.postMessage({ type: 'setIdentity' }));
       document.getElementById('updated').textContent = '';
       return;
     }
@@ -526,10 +660,16 @@ function getHtml(webview) {
         ? { ...selected.metrics, estCost: selected.estCost, judgeScore: selected.judgeScore }
         : s.data.totals;
 
+      const scopeHint = s.scopeKey === 'me'
+        ? 'Me · ' + esc(s.meIdentity || '') + ' · local ledger'
+        : 'All · team (LaunchDarkly Monitoring)';
       html += '<div class="scope">' + (selected
         ? 'Totals for <span class="chip">' + esc(selected.variationKey) + '</span>' +
           '<a id="clear-scope">show all</a>'
-        : 'Totals · all models') + '</div>';
+        : 'Totals · ' + scopeHint) + '</div>';
+      if (s.scopeKey === 'me' && (t.totalTokens || 0) === 0 && (t.generationCount || 0) > 0) {
+        html += '<div class="muted" style="margin:0 0 8px">Tokens for Me only appear when this machine wrote token events to the local ledger (shared pollers do not).</div>';
+      }
 
       html += '<div class="tiles">' +
         tile('Generations', compact(t.generationCount)) +

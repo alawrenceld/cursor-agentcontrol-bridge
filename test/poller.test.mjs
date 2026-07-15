@@ -4,6 +4,9 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtempSync, writeFileSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 
 import {
   parseArgs,
@@ -18,7 +21,7 @@ const NOW = Date.now();
 function usageEvent(overrides = {}) {
   return {
     timestamp: String(NOW - 60_000),
-    userEmail: 'ttotenberg@launchdarkly.com',
+    userEmail: 'dev@example.com',
     model: 'claude-4.5-sonnet',
     kind: 'USAGE_EVENT_KIND_USER_PROMPT',
     tokenUsage: {
@@ -110,6 +113,23 @@ test('fetchUsageEvents paginates using pagination.numPages', async () => {
 
 test('pollOnce: emits tokens, filters emails, dedupes, skips unmapped models', async () => {
   process.env.CURSOR_ADMIN_KEY = 'test-key';
+  // Public defaults leave userEmails empty (= ingest everyone). Point the
+  // poller at a temp config that still exercises the allowlist.
+  const dir = mkdtempSync(path.join(tmpdir(), 'poller-cfg-'));
+  const base = JSON.parse(readFileSync(new URL('../bridge.config.json', import.meta.url)));
+  const cfgPath = path.join(dir, 'bridge.config.json');
+  writeFileSync(
+    cfgPath,
+    JSON.stringify({
+      ...base,
+      hookUserEmail: 'dev@example.com',
+      userEmails: ['dev@example.com'],
+      stateDir: dir,
+    }),
+  );
+  const prevConfig = process.env.LD_AGENTCONTROL_CONFIG;
+  process.env.LD_AGENTCONTROL_CONFIG = cfgPath;
+
   const duplicate = usageEvent();
   stubFetch([
     [
@@ -121,7 +141,13 @@ test('pollOnce: emits tokens, filters emails, dedupes, skips unmapped models', a
     ],
   ]);
 
-  const stderrOutput = await captureStderr(() => pollOnce({ dryRun: true, since: null }));
+  let stderrOutput;
+  try {
+    stderrOutput = await captureStderr(() => pollOnce({ dryRun: true, since: null }));
+  } finally {
+    if (prevConfig === undefined) delete process.env.LD_AGENTCONTROL_CONFIG;
+    else process.env.LD_AGENTCONTROL_CONFIG = prevConfig;
+  }
   const emitted = dryRunEvents(stderrOutput);
 
   // 2 usable events x 3 token metrics (input/output/total all > 0).
@@ -141,7 +167,7 @@ test('pollOnce: emits tokens, filters emails, dedupes, skips unmapped models', a
   assert.equal(total.data.providerName, 'cursor');
   assert.equal(total.data.cacheReadTokens, 4000);
   assert.equal(total.data.totalCents, 12.3);
-  assert.equal(total.context.key, 'ttotenberg@launchdarkly.com');
+  assert.equal(total.context.key, 'dev@example.com');
 
   assert.match(stderrOutput, /emitted=2 deduped=1 filtered=1 unmappedModel=1/);
 });

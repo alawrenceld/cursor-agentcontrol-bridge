@@ -8,5 +8,5 @@
   "output_tokens": 500,
   "cache_read_tokens": 4000,
   "cache_write_tokens": 0,
-  "user_email": "ttotenberg@launchdarkly.com"
+  "user_email": "dev@example.com"
 }

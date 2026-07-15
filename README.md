@@ -125,6 +125,15 @@ double-counting. Backfill with `--since 2026-06-01`; preview anything with `--dr
 4. **Token reconciliation.** After a day, compare dashboard token totals against Cursor's
    own usage page (Admin API data is hourly-fresh, so expect lag on the last hour).
 
+## Me vs All & reporting
+
+- Extension sidebar: **All** (LD Monitoring, team) vs **Me** (local `usage-events.jsonl`
+  filtered by `hookUserEmail`). See [SETUP.md](SETUP.md).
+- Me tokens only include events written on this machine; see [docs/SPIKE-me-remote.md](docs/SPIKE-me-remote.md).
+- Exec report (user/model filters + CSV): `npm run report:export && npm run report:serve`
+  ([report/](report/)).
+- Multi-provider roadmap: [docs/AGENT_USAGE_EVENT.md](docs/AGENT_USAGE_EVENT.md).
+
 ## Limitations
 
 - **Tokens/cost need Teams+.** Hooks-only mode has no token source (Cursor doesn't put
@@ -150,7 +159,9 @@ double-counting. Backfill with `--since 2026-06-01`; preview anything with `--dr
 | `src/lib/ldTrack.mjs` | Shared LD client wrapper; payloads mirror `@launchdarkly/server-sdk-ai` |
 | `scripts/setup-ai-config.mjs` | Optional: create the AI Config + variations via REST |
 | `bridge.config.json` | Config key, model→variation map, allowlist (repo mode; the extension seeds `~/.cursor/ld-agentcontrol.json` from it for user mode) |
-| `extension/` | All-in-one Cursor extension: bundled self-installing hook + Monitoring metrics UI (see its README) |
+| `extension/` | All-in-one Cursor extension: bundled self-installing hook + Monitoring metrics UI (**All** from LD, **Me** from local ledger) — see its README and [SETUP.md](SETUP.md) |
+| `report/` | Standalone exec reporting page (filters + CSV) over exported ledger / summary JSON |
+| `docs/` | Spike notes, `AgentUsageEvent` multi-provider roadmap |
 | `scripts/sync-model-library.mjs` | Create `Cursor.*` entries in LD's model library at Cursor's billed prices and link every variation (required for cost derivation) |
 | `test/` | Payload-shape tests against the real AI SDK + poller and extension logic tests |
 

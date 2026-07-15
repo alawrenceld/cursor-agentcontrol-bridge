@@ -10,6 +10,7 @@ import { randomUUID } from 'node:crypto';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { appendUsageEvent } from './usageLedger.mjs';
 
 // import.meta.url is empty when esbuild bundles this to CJS for the
 // extension; there __dirname exists instead (and PROJECT_ROOT only matters
@@ -169,15 +170,53 @@ function log(...parts) {
  *
  * Usage: const t = await createLdTracker(); t.track(...); await t.close();
  */
+function recordLedger(eventKey, context, data, metricValue, stateDir) {
+  const {
+    configKey,
+    variationKey,
+    modelName,
+    providerName,
+    runId,
+    version,
+    ...extras
+  } = data && typeof data === 'object' ? data : {};
+  appendUsageEvent(
+    {
+      userKey: context?.key,
+      configKey,
+      variationKey,
+      modelName,
+      providerName,
+      eventKey,
+      metricValue,
+      extras: { runId, version, ...extras },
+    },
+    stateDir,
+  );
+}
+
 export async function createLdTracker({
   dryRun = process.env.DRY_RUN === '1',
   sdkKey = process.env.LD_SDK_KEY,
+  stateDir = null,
 } = {}) {
+  // Resolve state dir lazily so callers in repo mode write under `.state/`.
+  const resolvedStateDir =
+    stateDir ??
+    (() => {
+      try {
+        return resolveRuntime().stateDir;
+      } catch {
+        return USER_STATE_DIR;
+      }
+    })();
+
   if (dryRun) {
     return {
       dryRun: true,
       track(eventKey, context, data, metricValue) {
         log(`DRY_RUN track ${eventKey}`, JSON.stringify({ context, data, metricValue }));
+        recordLedger(eventKey, context, data, metricValue, resolvedStateDir);
       },
       async evaluate(flagKey, context) {
         log(`DRY_RUN evaluate ${flagKey}`, JSON.stringify(context));
@@ -211,6 +250,7 @@ export async function createLdTracker({
     dryRun: false,
     track(eventKey, context, data, metricValue) {
       client.track(eventKey, context, data, metricValue);
+      recordLedger(eventKey, context, data, metricValue, resolvedStateDir);
     },
     /**
      * Evaluate an AI Config flag so LD serves the variation (targeting rules

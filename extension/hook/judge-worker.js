@@ -1591,8 +1591,8 @@ var require_cjs = __commonJS({
     function canonicalizeUri(uri) {
       return uri.replace(/\/+$/, "");
     }
-    function canonicalizePath(path3) {
-      return path3.replace(/^\/+/, "").replace(/\?$/, "");
+    function canonicalizePath(path4) {
+      return path4.replace(/^\/+/, "").replace(/\?$/, "");
     }
     var ServiceEndpoints = class _ServiceEndpoints {
       constructor(streaming, polling, events = _ServiceEndpoints.DEFAULT_EVENTS, analyticsEventPath = "/bulk", diagnosticEventPath = "/diagnostic", includeAuthorizationHeader = true, payloadFilterKey) {
@@ -1613,24 +1613,24 @@ var require_cjs = __commonJS({
       const parts = parameters.map(({ key, value }) => `${key}=${value}`);
       return `${uri}?${parts.join("&")}`;
     }
-    function getStreamingUri(endpoints, path3, parameters) {
-      const canonicalizedPath = canonicalizePath(path3);
+    function getStreamingUri(endpoints, path4, parameters) {
+      const canonicalizedPath = canonicalizePath(path4);
       const combinedParameters = [...parameters];
       if (endpoints.payloadFilterKey) {
         combinedParameters.push({ key: "filter", value: endpoints.payloadFilterKey });
       }
       return getWithParams(`${endpoints.streaming}/${canonicalizedPath}`, combinedParameters);
     }
-    function getPollingUri(endpoints, path3, parameters = []) {
-      const canonicalizedPath = canonicalizePath(path3);
+    function getPollingUri(endpoints, path4, parameters = []) {
+      const canonicalizedPath = canonicalizePath(path4);
       const combinedParameters = [...parameters];
       if (endpoints.payloadFilterKey) {
         combinedParameters.push({ key: "filter", value: endpoints.payloadFilterKey });
       }
       return getWithParams(`${endpoints.polling}/${canonicalizedPath}`, combinedParameters);
     }
-    function getEventsUri(endpoints, path3, parameters = []) {
-      const canonicalizedPath = canonicalizePath(path3);
+    function getEventsUri(endpoints, path4, parameters = []) {
+      const canonicalizedPath = canonicalizePath(path4);
       return getWithParams(`${endpoints.events}/${canonicalizedPath}`, parameters);
     }
     var LDUnexpectedResponseError = class extends Error {
@@ -3733,8 +3733,8 @@ var require_VersionedDataKinds = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var VersionedDataKinds = class {
-      static getKeyFromPath(kind, path3) {
-        return path3.startsWith(kind.streamApiPath) ? path3.substring(kind.streamApiPath.length) : void 0;
+      static getKeyFromPath(kind, path4) {
+        return path4.startsWith(kind.streamApiPath) ? path4.substring(kind.streamApiPath.length) : void 0;
       }
     };
     VersionedDataKinds.Features = {
@@ -4010,9 +4010,9 @@ var require_createStreamListeners = __commonJS({
     var createPatchListener = (dataSourceUpdates, logger, onPatchCompleteHandler = () => {
     }) => ({
       deserializeData: serialization_1.deserializePatch,
-      processJson: async ({ data, kind, path: path3 }) => {
+      processJson: async ({ data, kind, path: path4 }) => {
         if (kind) {
-          const key = VersionedDataKinds_1.default.getKeyFromPath(kind, path3);
+          const key = VersionedDataKinds_1.default.getKeyFromPath(kind, path4);
           if (key) {
             logger === null || logger === void 0 ? void 0 : logger.debug(`Updating ${key} in ${kind.namespace}`);
             dataSourceUpdates.upsert(kind, data, onPatchCompleteHandler);
@@ -4024,9 +4024,9 @@ var require_createStreamListeners = __commonJS({
     var createDeleteListener = (dataSourceUpdates, logger, onDeleteCompleteHandler = () => {
     }) => ({
       deserializeData: serialization_1.deserializeDelete,
-      processJson: async ({ kind, path: path3, version }) => {
+      processJson: async ({ kind, path: path4, version }) => {
         if (kind) {
-          const key = VersionedDataKinds_1.default.getKeyFromPath(kind, path3);
+          const key = VersionedDataKinds_1.default.getKeyFromPath(kind, path4);
           if (key) {
             logger === null || logger === void 0 ? void 0 : logger.debug(`Deleting ${key} in ${kind.namespace}`);
             dataSourceUpdates.upsert(kind, {
@@ -4282,10 +4282,10 @@ var require_FileLoader = __commonJS({
        * Load all the files and start watching them if watching is enabled.
        */
       async loadAndWatch() {
-        const promises = this._paths.map(async (path3) => {
-          const data = await this._filesystem.readFile(path3);
-          const timeStamp = await this._filesystem.getFileTimestamp(path3);
-          return { data, path: path3, timeStamp };
+        const promises = this._paths.map(async (path4) => {
+          const data = await this._filesystem.readFile(path4);
+          const timeStamp = await this._filesystem.getFileTimestamp(path4);
+          return { data, path: path4, timeStamp };
         });
         const results = await Promise.all(promises);
         results.forEach((res) => {
@@ -4294,8 +4294,8 @@ var require_FileLoader = __commonJS({
         });
         this._callback(results);
         if (this._watch) {
-          this._paths.forEach((path3) => {
-            const watcher = this._filesystem.watch(path3, async (_, updatePath) => {
+          this._paths.forEach((path4) => {
+            const watcher = this._filesystem.watch(path4, async (_, updatePath) => {
               const timeStamp = await this._filesystem.getFileTimestamp(updatePath);
               if (timeStamp === this._fileTimestamps[updatePath]) {
                 return;
@@ -4316,8 +4316,8 @@ var require_FileLoader = __commonJS({
         if (!this._debounceHandle) {
           this._debounceHandle = setTimeout(() => {
             this._debounceHandle = void 0;
-            this._callback(Object.entries(this._fileData).reduce((acc, [path3, data]) => {
-              acc.push({ path: path3, data });
+            this._callback(Object.entries(this._fileData).reduce((acc, [path4, data]) => {
+              acc.push({ path: path4, data });
               return acc;
             }, []));
           }, 10);
@@ -12169,16 +12169,16 @@ var require_NodeFilesystem = __commonJS({
     var fs = require("fs");
     var fsPromises = fs.promises;
     var NodeFilesystem = class {
-      async getFileTimestamp(path3) {
-        const stat = await fsPromises.stat(path3);
+      async getFileTimestamp(path4) {
+        const stat = await fsPromises.stat(path4);
         return stat.mtimeMs;
       }
-      async readFile(path3) {
-        return fsPromises.readFile(path3, "utf8");
+      async readFile(path4) {
+        return fsPromises.readFile(path4, "utf8");
       }
-      watch(path3, callback) {
-        return fs.watch(path3, { persistent: false }, (eventType) => {
-          callback(eventType, path3);
+      watch(path4, callback) {
+        return fs.watch(path4, { persistent: false }, (eventType) => {
+          callback(eventType, path4);
         });
       }
     };
@@ -12191,7 +12191,7 @@ var require_NodeInfo = __commonJS({
   "node_modules/@launchdarkly/node-server-sdk/dist/src/platform/NodeInfo.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var os3 = require("os");
+    var os4 = require("os");
     var sdkName = "@launchdarkly/node-server-sdk";
     var sdkVersion = "9.11.3";
     function processPlatformName(name) {
@@ -12213,9 +12213,9 @@ var require_NodeInfo = __commonJS({
       platformData() {
         return {
           os: {
-            name: processPlatformName(os3.platform()),
-            version: os3.version(),
-            arch: os3.arch()
+            name: processPlatformName(os4.platform()),
+            version: os4.version(),
+            arch: os4.arch()
           },
           name: "Node",
           additional: {
@@ -14311,28 +14311,70 @@ var require_src2 = __commonJS({
 });
 
 // src/judge/judge-worker.mjs
-var import_node_fs2 = require("node:fs");
+var import_node_fs3 = require("node:fs");
 var import_node_child_process = require("node:child_process");
-var import_node_os2 = __toESM(require("node:os"), 1);
-var import_node_path2 = __toESM(require("node:path"), 1);
+var import_node_os3 = __toESM(require("node:os"), 1);
+var import_node_path3 = __toESM(require("node:path"), 1);
 
 // src/lib/ldTrack.mjs
-var import_node_fs = require("node:fs");
+var import_node_fs2 = require("node:fs");
 var import_node_crypto = require("node:crypto");
+var import_node_os2 = __toESM(require("node:os"), 1);
+var import_node_path2 = __toESM(require("node:path"), 1);
+var import_node_url = require("node:url");
+
+// src/lib/usageLedger.mjs
+var import_node_fs = require("node:fs");
 var import_node_os = __toESM(require("node:os"), 1);
 var import_node_path = __toESM(require("node:path"), 1);
-var import_node_url = require("node:url");
+var DEFAULT_STATE_DIR = import_node_path.default.join(import_node_os.default.homedir(), ".cursor", "ld-agentcontrol-state");
+var LEDGER_FILENAME = "usage-events.jsonl";
+function ledgerPath(stateDir = DEFAULT_STATE_DIR) {
+  return import_node_path.default.join(stateDir, LEDGER_FILENAME);
+}
+function appendUsageEvent({
+  ts = Date.now(),
+  userKey,
+  configKey,
+  variationKey,
+  modelName,
+  providerName,
+  eventKey,
+  metricValue,
+  extras = {}
+}, stateDir = DEFAULT_STATE_DIR) {
+  if (!eventKey) return;
+  try {
+    (0, import_node_fs.mkdirSync)(stateDir, { recursive: true });
+    const line = JSON.stringify({
+      ts,
+      userKey: userKey ?? "unknown",
+      configKey: configKey ?? null,
+      variationKey: variationKey ?? null,
+      modelName: modelName ?? null,
+      providerName: providerName ?? null,
+      eventKey,
+      metricValue: typeof metricValue === "number" ? metricValue : 0,
+      extras: extras && typeof extras === "object" ? extras : {}
+    });
+    (0, import_node_fs.appendFileSync)(ledgerPath(stateDir), `${line}
+`);
+  } catch {
+  }
+}
+
+// src/lib/ldTrack.mjs
 var import_meta = {};
 var moduleDir = (() => {
   try {
-    return import_node_path.default.dirname((0, import_node_url.fileURLToPath)(import_meta.url));
+    return import_node_path2.default.dirname((0, import_node_url.fileURLToPath)(import_meta.url));
   } catch {
     return typeof __dirname !== "undefined" ? __dirname : process.cwd();
   }
 })();
-var PROJECT_ROOT = import_node_path.default.resolve(moduleDir, "..", "..");
-var USER_CONFIG_PATH = import_node_path.default.join(import_node_os.default.homedir(), ".cursor", "ld-agentcontrol.json");
-var USER_STATE_DIR = import_node_path.default.join(import_node_os.default.homedir(), ".cursor", "ld-agentcontrol-state");
+var PROJECT_ROOT = import_node_path2.default.resolve(moduleDir, "..", "..");
+var USER_CONFIG_PATH = import_node_path2.default.join(import_node_os2.default.homedir(), ".cursor", "ld-agentcontrol.json");
+var USER_STATE_DIR = import_node_path2.default.join(import_node_os2.default.homedir(), ".cursor", "ld-agentcontrol-state");
 var EVENT_KEYS = {
   durationTotal: "$ld:ai:duration:total",
   tokensTtf: "$ld:ai:tokens:ttf",
@@ -14345,9 +14387,9 @@ var EVENT_KEYS = {
   feedbackNegative: "$ld:ai:feedback:user:negative",
   toolCall: "$ld:ai:tool_call"
 };
-function loadEnv(envPath = import_node_path.default.join(PROJECT_ROOT, ".env")) {
-  if (!(0, import_node_fs.existsSync)(envPath)) return;
-  for (const line of (0, import_node_fs.readFileSync)(envPath, "utf8").split("\n")) {
+function loadEnv(envPath = import_node_path2.default.join(PROJECT_ROOT, ".env")) {
+  if (!(0, import_node_fs2.existsSync)(envPath)) return;
+  for (const line of (0, import_node_fs2.readFileSync)(envPath, "utf8").split("\n")) {
     const match = line.match(/^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
     if (!match) continue;
     const [, key, rawValue] = match;
@@ -14355,11 +14397,11 @@ function loadEnv(envPath = import_node_path.default.join(PROJECT_ROOT, ".env")) 
     process.env[key] = rawValue.replace(/^(['"])(.*)\1$/, "$2");
   }
 }
-function loadBridgeConfig(configPath = import_node_path.default.join(PROJECT_ROOT, "bridge.config.json")) {
-  const config = JSON.parse((0, import_node_fs.readFileSync)(configPath, "utf8"));
+function loadBridgeConfig(configPath = import_node_path2.default.join(PROJECT_ROOT, "bridge.config.json")) {
+  const config = JSON.parse((0, import_node_fs2.readFileSync)(configPath, "utf8"));
   for (const field of ["aiConfigKey", "aiConfigVersion", "providerName", "models"]) {
     if (config[field] === void 0) {
-      throw new Error(`${import_node_path.default.basename(configPath)} is missing required field "${field}"`);
+      throw new Error(`${import_node_path2.default.basename(configPath)} is missing required field "${field}"`);
     }
   }
   return config;
@@ -14367,7 +14409,7 @@ function loadBridgeConfig(configPath = import_node_path.default.join(PROJECT_ROO
 function resolveRuntime() {
   const explicit = process.env.LD_AGENTCONTROL_CONFIG;
   if (explicit !== "repo") {
-    const userPath = explicit || ((0, import_node_fs.existsSync)(USER_CONFIG_PATH) ? USER_CONFIG_PATH : null);
+    const userPath = explicit || ((0, import_node_fs2.existsSync)(USER_CONFIG_PATH) ? USER_CONFIG_PATH : null);
     if (userPath) {
       const config = loadBridgeConfig(userPath);
       return {
@@ -14382,9 +14424,9 @@ function resolveRuntime() {
   loadEnv();
   return {
     mode: "repo",
-    configPath: import_node_path.default.join(PROJECT_ROOT, "bridge.config.json"),
+    configPath: import_node_path2.default.join(PROJECT_ROOT, "bridge.config.json"),
     config: loadBridgeConfig(),
-    stateDir: import_node_path.default.join(PROJECT_ROOT, ".state"),
+    stateDir: import_node_path2.default.join(PROJECT_ROOT, ".state"),
     sdkKey: process.env.LD_SDK_KEY
   };
 }
@@ -14414,15 +14456,48 @@ function log(...parts) {
   process.stderr.write(`[ldTrack] ${parts.join(" ")}
 `);
 }
+function recordLedger(eventKey, context, data, metricValue, stateDir) {
+  const {
+    configKey,
+    variationKey,
+    modelName,
+    providerName,
+    runId,
+    version,
+    ...extras
+  } = data && typeof data === "object" ? data : {};
+  appendUsageEvent(
+    {
+      userKey: context?.key,
+      configKey,
+      variationKey,
+      modelName,
+      providerName,
+      eventKey,
+      metricValue,
+      extras: { runId, version, ...extras }
+    },
+    stateDir
+  );
+}
 async function createLdTracker({
   dryRun = process.env.DRY_RUN === "1",
-  sdkKey = process.env.LD_SDK_KEY
+  sdkKey = process.env.LD_SDK_KEY,
+  stateDir = null
 } = {}) {
+  const resolvedStateDir = stateDir ?? (() => {
+    try {
+      return resolveRuntime().stateDir;
+    } catch {
+      return USER_STATE_DIR;
+    }
+  })();
   if (dryRun) {
     return {
       dryRun: true,
       track(eventKey, context, data, metricValue) {
         log(`DRY_RUN track ${eventKey}`, JSON.stringify({ context, data, metricValue }));
+        recordLedger(eventKey, context, data, metricValue, resolvedStateDir);
       },
       async evaluate(flagKey, context) {
         log(`DRY_RUN evaluate ${flagKey}`, JSON.stringify(context));
@@ -14452,6 +14527,7 @@ async function createLdTracker({
     dryRun: false,
     track(eventKey, context, data, metricValue) {
       client.track(eventKey, context, data, metricValue);
+      recordLedger(eventKey, context, data, metricValue, resolvedStateDir);
     },
     /**
      * Evaluate an AI Config flag so LD serves the variation (targeting rules
@@ -14546,9 +14622,9 @@ function extractScore(text) {
 var runtime = resolveRuntime();
 function logLine(message) {
   try {
-    (0, import_node_fs2.mkdirSync)(runtime.stateDir, { recursive: true });
-    (0, import_node_fs2.appendFileSync)(
-      import_node_path2.default.join(runtime.stateDir, "judge.log"),
+    (0, import_node_fs3.mkdirSync)(runtime.stateDir, { recursive: true });
+    (0, import_node_fs3.appendFileSync)(
+      import_node_path3.default.join(runtime.stateDir, "judge.log"),
       `${(/* @__PURE__ */ new Date()).toISOString()} ${message}
 `
     );
@@ -14574,7 +14650,7 @@ function runCursorAgent({ rubric, input, model, timeoutMs, apiKey }) {
 Do not use any tools, do not read or modify any files \u2014 evaluate only the material below and reply with the JSON verdict.
 
 ${input}`;
-  const cwd = (0, import_node_fs2.mkdtempSync)(import_node_path2.default.join(import_node_os2.default.tmpdir(), "ld-judge-"));
+  const cwd = (0, import_node_fs3.mkdtempSync)(import_node_path3.default.join(import_node_os3.default.tmpdir(), "ld-judge-"));
   const result = (0, import_node_child_process.spawnSync)(
     "cursor-agent",
     ["-p", prompt, "--output-format", "json", "--trust", ...model ? ["--model", model] : []],
@@ -14644,7 +14720,7 @@ async function runAnthropic({ rubric, input, model, timeoutMs }) {
 async function main() {
   const jobPath = process.argv[2];
   if (!jobPath) throw new Error("usage: judge-worker <job.json>");
-  const job = JSON.parse((0, import_node_fs2.readFileSync)(jobPath, "utf8"));
+  const job = JSON.parse((0, import_node_fs3.readFileSync)(jobPath, "utf8"));
   const judgeCfg = runtime.config?.judge;
   if (!judgeCfg?.configKey) {
     logLine("no judge.configKey configured \u2014 exiting");
@@ -14666,7 +14742,7 @@ async function main() {
     await tracker.close();
     return;
   }
-  const transcript = parseTranscript((0, import_node_fs2.readFileSync)(job.transcriptPath, "utf8"));
+  const transcript = parseTranscript((0, import_node_fs3.readFileSync)(job.transcriptPath, "utf8"));
   const diff = judgeCfg.includeDiff === false ? "" : gitDiff(job.workspaceRoot);
   const input = buildJudgeInput({
     messages: transcript,
@@ -14733,8 +14809,8 @@ ${output.slice(0, 1e4)}`;
       verdict.score
     );
     try {
-      (0, import_node_fs2.appendFileSync)(
-        import_node_path2.default.join(runtime.stateDir, "judge-scores.jsonl"),
+      (0, import_node_fs3.appendFileSync)(
+        import_node_path3.default.join(runtime.stateDir, "judge-scores.jsonl"),
         `${JSON.stringify({
           ts: Date.now(),
           configKey: job.parentTrackData.configKey,
@@ -14756,7 +14832,7 @@ ${output.slice(0, 1e4)}`;
   }
   await tracker.close();
   try {
-    (0, import_node_fs2.unlinkSync)(jobPath);
+    (0, import_node_fs3.unlinkSync)(jobPath);
   } catch {
   }
 }
