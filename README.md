@@ -7,6 +7,8 @@ Measure AI agent activity inside the Cursor IDE and feed it into LaunchDarkly:
 - **OTLP dual-emit** — per-user attributes in LaunchDarkly Observability
 - **Claude Code adapter** — second provider via CLI hooks ([docs/claude-code-adapter.md](docs/claude-code-adapter.md))
 
+![Cursor Usage · LaunchDarkly panel — All scope, last 30 days](docs/media/cursor-usage-panel.png)
+
 ```
 Cursor IDE / Claude Code
  ├─ hooks (real-time) ──► duration + generation success/error (+ ledger + OTLP)
