@@ -19,6 +19,8 @@
     "setup:claude-ai-config": "node scripts/setup-claude-ai-config.mjs",
     "sync:claude-models": "node scripts/sync-claude-model-library.mjs",
     "install:claude-hooks": "node scripts/install-claude-hooks.mjs",
+    "install:menubar": "node scripts/install-menubar.mjs",
+    "menubar": "node scripts/agent-menubar.mjs",
     "agent:usage": "node scripts/agent-usage-report.mjs",
     "claude:usage": "node scripts/agent-usage-report.mjs",
     "build:hook": "node scripts/build-hook.mjs",

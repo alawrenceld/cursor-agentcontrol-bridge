@@ -14,6 +14,9 @@ Most people should install the **extension** (below). The root [README.md](READM
 `npm run install:claude-hooks` after `setup:claude-ai-config` / `sync:claude-models`. Uses AI Config
 `claude-code-usage` (separate from `cursor-agent-usage`).
 
+**Optional macOS menu bar:** see [docs/MENUBAR.md](docs/MENUBAR.md) —
+`npm run install:menubar` after SwiftBar (`brew install --cask swiftbar`). Cursor + Claude local usage popover.
+
 ---
 
 ## LaunchDarkly credentials (what each one is)

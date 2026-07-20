@@ -6,6 +6,7 @@ Measure AI agent activity inside the Cursor IDE and feed it into LaunchDarkly:
 - **Local Me ledger** — per-user view inside the IDE
 - **OTLP dual-emit** — per-user attributes in LaunchDarkly Observability
 - **Claude Code adapter** — second provider via CLI hooks ([docs/claude-code-adapter.md](docs/claude-code-adapter.md))
+- **Optional macOS menu bar** — Cursor + Claude by model via SwiftBar ([docs/MENUBAR.md](docs/MENUBAR.md))
 
 ![Cursor Usage · LaunchDarkly panel — All scope, last 30 days](docs/media/cursor-usage-panel.png)
 
@@ -99,6 +100,7 @@ npm run poller:dry     # Admin API only, no LD writes
 - Me tokens only from this machine’s ledger: [docs/SPIKE-me-remote.md](docs/SPIKE-me-remote.md)
 - OTLP per-user reporting: [docs/OTLP-DUAL-EMIT.md](docs/OTLP-DUAL-EMIT.md)
 - Claude Code hooks: [docs/claude-code-adapter.md](docs/claude-code-adapter.md) (`npm run install:claude-hooks`)
+- macOS menu bar (optional): [docs/MENUBAR.md](docs/MENUBAR.md) (`npm run install:menubar`)
 - Exec CSV report: `npm run report:export && npm run report:serve` ([report/](report/))
 - Multi-provider roadmap: [docs/AGENT_USAGE_EVENT.md](docs/AGENT_USAGE_EVENT.md)
 
