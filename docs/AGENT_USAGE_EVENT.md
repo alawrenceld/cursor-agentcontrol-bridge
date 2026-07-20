@@ -52,9 +52,9 @@ type AgentUsageEvent = {
 |----------|------|--------|-------|
 | 1 (done) | Cursor | Hooks + Admin API | Reference adapter in this repo |
 | 2 (done) | Claude Code | CLI hooks + transcript deltas | See [claude-code-adapter.md](claude-code-adapter.md) |
-| 3 | VS Code Copilot | Extension / LM APIs | Tokens often incomplete |
+| 3 (done) | VS Code Copilot | Copilot Chat OTLP `gen_ai.*` | See [copilot-adapter.md](copilot-adapter.md) — local receiver on `:4319` |
 | 4 | Continue / Aider / Cline | Logs or OpenAI-compatible proxy | Prefer proxy + OTel |
-| forever | Generic | OTLP `gen_ai.*` | Best public standard |
+| forever | Generic | OTLP `gen_ai.*` | Copilot receiver is the first ingest of this path |
 
 ## In-repo helpers (v1)
 
@@ -63,6 +63,8 @@ Implemented in [`src/lib/agentUsageEvent.mjs`](../src/lib/agentUsageEvent.mjs):
 - `normalizeAgentUsageEvent` / `toLdTrackCalls` / `applyAgentUsageEvent`
 
 Claude Code install: `npm run install:claude-hooks` after `setup:claude-ai-config` + `sync:claude-models`.
+
+Copilot install: `npm run install:copilot-otel` after `setup:copilot-ai-config` + `sync:copilot-models`, then `npm run copilot:receiver`.
 
 ## Package extraction (later)
 

@@ -31,9 +31,42 @@ export const USER_CONFIG_PATH = path.join(os.homedir(), '.cursor', 'ld-agentcont
 export const USER_STATE_DIR = path.join(os.homedir(), '.cursor', 'ld-agentcontrol-state');
 export const CLAUDE_CONFIG_PATH = path.join(os.homedir(), '.claude', 'ld-agentcontrol.json');
 export const CLAUDE_STATE_DIR = path.join(os.homedir(), '.claude', 'ld-agentcontrol-state');
+export const COPILOT_CONFIG_PATH = path.join(os.homedir(), '.copilot', 'ld-agentcontrol.json');
+export const COPILOT_STATE_DIR = path.join(os.homedir(), '.copilot', 'ld-agentcontrol-state');
 
 /** Context attribute used for evaluation-based variation targeting (both providers). */
 export const AGENT_MODEL_ATTR = 'agentModel';
+
+const PROVIDER_DEFAULTS = {
+  cursor: {
+    id: 'cursor',
+    userConfig: USER_CONFIG_PATH,
+    userState: USER_STATE_DIR,
+    repoConfig: () => path.join(PROJECT_ROOT, 'bridge.config.json'),
+    repoState: () => path.join(PROJECT_ROOT, '.state'),
+  },
+  'claude-code': {
+    id: 'claude-code',
+    userConfig: CLAUDE_CONFIG_PATH,
+    userState: CLAUDE_STATE_DIR,
+    repoConfig: () => path.join(PROJECT_ROOT, 'adapters', 'claude-code', 'config.defaults.json'),
+    repoState: () => path.join(PROJECT_ROOT, '.state', 'claude-code'),
+  },
+  copilot: {
+    id: 'copilot',
+    userConfig: COPILOT_CONFIG_PATH,
+    userState: COPILOT_STATE_DIR,
+    repoConfig: () => path.join(PROJECT_ROOT, 'adapters', 'copilot', 'config.defaults.json'),
+    repoState: () => path.join(PROJECT_ROOT, '.state', 'copilot'),
+  },
+};
+
+function normalizeProviderId(hint) {
+  const raw = hint || 'cursor';
+  if (raw === 'claude') return 'claude-code';
+  if (PROVIDER_DEFAULTS[raw]) return PROVIDER_DEFAULTS[raw].id;
+  return 'cursor';
+}
 
 export const EVENT_KEYS = {
   durationTotal: '$ld:ai:duration:total',
@@ -76,24 +109,26 @@ export function loadBridgeConfig(configPath = path.join(PROJECT_ROOT, 'bridge.co
 /**
  * Resolve where config, state, and the SDK key come from.
  *
- * @param {{ provider?: 'cursor'|'claude-code' }} [opts]
- *   `provider` selects default user-config paths (`~/.cursor/…` vs `~/.claude/…`).
- *   Also honored via `LD_AGENTCONTROL_PROVIDER`.
+ * @param {{ provider?: 'cursor'|'claude-code'|'copilot' }} [opts]
+ *   `provider` selects default user-config paths. Also honored via
+ *   `LD_AGENTCONTROL_PROVIDER`.
  *
  * - **User mode**: provider-specific `ld-agentcontrol.json` (+ optional `sdkKey` /
  *   `stateDir`). Explicit `LD_AGENTCONTROL_CONFIG=/path` overrides.
  * - **Repo mode**: `LD_AGENTCONTROL_CONFIG=repo` — Cursor uses `bridge.config.json`,
- *   Claude Code uses `adapters/claude-code/config.defaults.json`.
+ *   Claude/Copilot use `adapters/<provider>/config.defaults.json`.
  */
 export function resolveRuntime({ provider } = {}) {
-  const providerHint =
-    provider || process.env.LD_AGENTCONTROL_PROVIDER || 'cursor';
-  const isClaude = providerHint === 'claude-code' || providerHint === 'claude';
-  const defaultUserConfig = isClaude ? CLAUDE_CONFIG_PATH : USER_CONFIG_PATH;
-  const defaultUserState = isClaude ? CLAUDE_STATE_DIR : USER_STATE_DIR;
-  const repoConfigPath = isClaude
-    ? path.join(PROJECT_ROOT, 'adapters', 'claude-code', 'config.defaults.json')
-    : path.join(PROJECT_ROOT, 'bridge.config.json');
+  const providerId = normalizeProviderId(
+    provider || process.env.LD_AGENTCONTROL_PROVIDER || 'cursor',
+  );
+  const defaults = PROVIDER_DEFAULTS[providerId];
+  const defaultUserConfig = defaults.userConfig;
+  const defaultUserState = defaults.userState;
+  const repoConfigPath = defaults.repoConfig();
+
+  // Always load repo .env so LD_SDK_KEY / tokens are available in user mode too.
+  loadEnv();
 
   const explicit = process.env.LD_AGENTCONTROL_CONFIG;
   if (explicit !== 'repo') {
@@ -101,27 +136,35 @@ export function resolveRuntime({ provider } = {}) {
       explicit || (existsSync(defaultUserConfig) ? defaultUserConfig : null);
     if (userPath) {
       const config = loadBridgeConfig(userPath);
+      const configKey = normalizeSdkKey(config.sdkKey);
       return {
         mode: 'user',
-        provider: isClaude ? 'claude-code' : 'cursor',
+        provider: providerId,
         configPath: userPath,
         config,
         stateDir: config.stateDir ?? defaultUserState,
-        sdkKey: config.sdkKey ?? process.env.LD_SDK_KEY,
+        sdkKey: configKey || process.env.LD_SDK_KEY,
       };
     }
   }
-  loadEnv();
   return {
     mode: 'repo',
-    provider: isClaude ? 'claude-code' : 'cursor',
+    provider: providerId,
     configPath: repoConfigPath,
     config: loadBridgeConfig(repoConfigPath),
-    stateDir: isClaude
-      ? path.join(PROJECT_ROOT, '.state', 'claude-code')
-      : path.join(PROJECT_ROOT, '.state'),
+    stateDir: defaults.repoState(),
     sdkKey: process.env.LD_SDK_KEY,
   };
+}
+
+/** Empty / placeholder sdkKey values must not shadow LD_SDK_KEY from .env. */
+function normalizeSdkKey(value) {
+  if (value == null) return '';
+  const s = String(value).trim();
+  if (!s) return '';
+  if (s === 'sdk-REPLACE_ME' || s.startsWith('sdk-REPLACE')) return '';
+  if (s === 'sdk-...' || s === 'sdk-YOUR-KEY-HERE') return '';
+  return s;
 }
 
 /**

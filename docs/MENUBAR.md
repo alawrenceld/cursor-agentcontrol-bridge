@@ -1,7 +1,7 @@
 # macOS menu bar (optional)
 
 A [SwiftBar](https://github.com/swiftbar/SwiftBar) plugin that opens a **Cursor-panel-style**
-popover (dark tiles + model table) for **Cursor + Claude Code** usage from the local
+popover (dark tiles + model table) for **Cursor + Claude Code + Copilot** usage from the local
 AgentControl ledgers. Same catalog ≈$ math as the Cursor IDE sidebar and `/agent-usage`.
 
 This is optional. The extension sidebar and slash command keep working without it.
@@ -10,7 +10,7 @@ This is optional. The extension sidebar and slash command keep working without i
 
 - Menu-bar title like `12 · ≈$3` (combined generations · catalog $ for the default window)
 - Click the title → webview popover (not a nested text menu)
-- Filters: **All / Cursor / Claude Code** · **Last hour / 24h / 7d / 30d**
+- Filters: **All / Cursor / Claude Code / Copilot** · **Last hour / 24h / 7d / 30d**
 - Tiles: Generations · Tokens · Cost · Duration · Quality
 - Model table: Gen, Tok/gen, $/gen, Score, Dur/gen (Agent column when All is selected)
 - Click a model row to scope the tiles; click column headers to sort
@@ -22,7 +22,7 @@ This is optional. The extension sidebar and slash command keep working without i
 | macOS | SwiftBar is macOS-only |
 | Node 18+ | Same as this repo (`node` on PATH, or Homebrew at `/opt/homebrew/bin/node`) |
 | This checkout | Plugin wrapper points at `scripts/agent-menubar.mjs` in the clone |
-| Local ledgers | Cursor and/or Claude Code hooks already writing usage events (see [SETUP.md](../SETUP.md), [claude-code-adapter.md](claude-code-adapter.md)) |
+| Local ledgers | Cursor, Claude Code, and/or Copilot adapters writing usage events |
 | SwiftBar | Installed via Homebrew below |
 
 **No** Cursor Admin API key. **No** Claude API key. **No** LaunchDarkly token for Me/local data.
@@ -81,6 +81,7 @@ You should see a compact title such as `4 · ≈$2.18` (or `AgentControl` if the
 |--------|------|
 | Cursor usage | `~/.cursor/ld-agentcontrol-state/usage-events.jsonl` |
 | Claude Code usage | `~/.claude/ld-agentcontrol-state/usage-events.jsonl` |
+| Copilot usage | `~/.copilot/ld-agentcontrol-state/usage-events.jsonl` |
 | Judge scores (Cursor) | `~/.cursor/ld-agentcontrol-state/judge-scores.jsonl` |
 | Generated popover | `~/.agentcontrol/menubar.html` |
 | Snapshot JSON | `~/.agentcontrol/menubar.json` |

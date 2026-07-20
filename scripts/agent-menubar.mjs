@@ -49,6 +49,14 @@ const AGENTS = [
     configKey: 'claude-code-usage',
     scoresPath: null,
   },
+  {
+    id: 'copilot',
+    label: 'Copilot',
+    stateDir: path.join(os.homedir(), '.copilot', 'ld-agentcontrol-state'),
+    configPath: path.join(os.homedir(), '.copilot', 'ld-agentcontrol.json'),
+    configKey: 'copilot-usage',
+    scoresPath: null,
+  },
 ];
 
 const STATE_DIR = path.join(os.homedir(), '.agentcontrol');

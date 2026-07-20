@@ -109,6 +109,7 @@ const AGENT_FILTERS = [
   { key: 'all', label: 'All' },
   { key: 'cursor', label: 'Cursor' },
   { key: 'claude-code', label: 'Claude Code' },
+  { key: 'copilot', label: 'Copilot' },
 ];
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) =>

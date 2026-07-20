@@ -15,7 +15,11 @@ Most people should install the **extension** (below). The root [README.md](READM
 `claude-code-usage` (separate from `cursor-agent-usage`).
 
 **Optional macOS menu bar:** see [docs/MENUBAR.md](docs/MENUBAR.md) —
-`npm run install:menubar` after SwiftBar (`brew install --cask swiftbar`). Cursor + Claude local usage popover.
+`npm run install:menubar` after SwiftBar (`brew install --cask swiftbar`). Cursor + Claude + Copilot local usage popover.
+
+**GitHub Copilot Chat (third provider):** see [docs/copilot-adapter.md](docs/copilot-adapter.md) —
+`npm run install:copilot-otel` after `setup:copilot-ai-config` / `sync:copilot-models`, then
+`npm run copilot:receiver`. Uses AI Config `copilot-usage`.
 
 ---
 
