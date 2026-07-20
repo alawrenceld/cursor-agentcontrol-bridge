@@ -104,7 +104,7 @@ npm run poller:dry     # Admin API only, no LD writes
 - Copilot Chat OTel: [docs/copilot-adapter.md](docs/copilot-adapter.md) (`npm run install:copilot-otel` + `copilot:receiver`)
 - macOS menu bar (optional): [docs/MENUBAR.md](docs/MENUBAR.md) (`npm run install:menubar`)
 - Exec CSV report: `npm run report:export && npm run report:serve` ([report/](report/))
-- Multi-provider roadmap: [docs/AGENT_USAGE_EVENT.md](docs/AGENT_USAGE_EVENT.md)
+- Multi-provider roadmap (adapters + judge): [docs/AGENT_USAGE_EVENT.md](docs/AGENT_USAGE_EVENT.md)
 
 ## Limitations
 

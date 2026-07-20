@@ -56,6 +56,25 @@ type AgentUsageEvent = {
 | 4 | Continue / Aider / Cline | Logs or OpenAI-compatible proxy | Prefer proxy + OTel |
 | forever | Generic | OTLP `gen_ai.*` | Copilot receiver is the first ingest of this path |
 
+## Quality / judge roadmap
+
+Cursor already runs a detached **judge worker** on sampled stop hooks: transcript +
+optional `git diff` → LD judge config rubric → score on the parent variation + local
+`judge-scores.jsonl` (sidebar / menubar Quality). See [`src/judge/`](../src/judge/).
+
+The worker, rubric evaluation, and score ledger are **reusable**. What blocks other
+providers is **conversation capture** into that job shape (`transcriptPath` /
+equivalent messages + `parentTrackData`), not the judge model itself.
+
+| Provider | Status | Effort (est.) | Notes |
+|----------|--------|---------------|--------|
+| **Cursor** | Done | — | Stop hook → `maybeSpawnJudge` → `judge-worker`; scores under `~/.cursor/ld-agentcontrol-state/judge-scores.jsonl` |
+| **Claude Code** | Not started | ~1–2 days | Transcripts already on disk (`transcript_path` on Stop). Map Claude JSONL → `[{role,content}]`, spawn the same worker from the Claude hook, write `~/.claude/…/judge-scores.jsonl`, wire menubar. Prefer `judge.provider=anthropic` (or guard recursion) so Claude judging does not fire Cursor hooks. |
+| **Copilot Chat** | Not started | ~3–5+ days | OTel path is metrics-only by default (`captureContent: false`). Enabling content capture ships prompts over OTLP (privacy tradeoff). No `transcript_path` today — need content-bearing spans or another Chat export. Do after Claude unless content capture is acceptable. |
+| Shared | Partial | Small | Menubar already merges per-agent score paths; extend beyond Cursor-only `scoresPath`. Keep one shared LD judge config (e.g. `cursor-output-judge`) unless providers need different rubrics. |
+
+**Order:** Claude Code first (same hook/transcript pattern as Cursor), Copilot later.
+
 ## In-repo helpers (v1)
 
 Implemented in [`src/lib/agentUsageEvent.mjs`](../src/lib/agentUsageEvent.mjs):
