@@ -52,9 +52,9 @@ cd /path/to/cursor-agentcontrol-bridge
 npm run install:menubar
 ```
 
-That writes an executable plugin (refresh every 5 minutes), typically:
+That writes an executable plugin (refresh every 1 minute), typically:
 
-`~/Library/Application Support/SwiftBar/AgentControl.5m.sh`
+`~/Library/Application Support/SwiftBar/AgentControl.1m.sh`
 
 and seeds:
 
@@ -100,7 +100,7 @@ npm run menubar -- --json            # write snapshot JSON (+ HTML) to stdout/st
 open ~/.agentcontrol/menubar.html    # preview the panel in a browser
 ```
 
-Refresh cadence is the `.5m` in the plugin filename (every 5 minutes). The ↻ control in the popover triggers `swiftbar://refreshall`.
+Refresh cadence is the `.1m` in the plugin filename (every 1 minute). The ↻ control in the popover triggers `swiftbar://refreshall`.
 
 Filter choices (agent + range) persist in the webview’s `localStorage`.
 
@@ -108,13 +108,14 @@ Filter choices (agent + range) persist in the webview’s `localStorage`.
 
 | Symptom | What to try |
 |---------|-------------|
-| No menu item | Confirm Plugin Folder includes the directory with `AgentControl.5m.sh`; Refresh all; ensure SwiftBar is running |
+| No menu item | Confirm Plugin Folder includes the directory with `AgentControl.1m.sh`; Refresh all; ensure SwiftBar is running |
 | `node not found` in menu | Install Node or ensure Homebrew node is at `/opt/homebrew/bin/node`; re-run `npm run install:menubar` |
 | Empty / zero stats | Run an agent in Cursor or Claude Code so hooks append to the ledgers; check `usage-events.jsonl` exists |
 | Quality always `–` | Judge worker only writes Cursor scores; Claude filter will stay empty for Score |
-| Stale numbers | Click ↻ or wait for the 5-minute refresh; or `npm run menubar -- --html` then Refresh all |
+| Stale `[?]` / missing `.5m.sh` | SwiftBar cached an old plugin name after a rename — **Refresh all** or quit & reopen SwiftBar |
+| Stale numbers | Click ↻ or wait for the 1-minute refresh; or `npm run menubar -- --html` then Refresh all |
 | Moved the git clone | Re-run `npm run install:menubar` so the plugin points at the new path |
-| Want a faster refresh | Rename `AgentControl.5m.sh` → e.g. `AgentControl.1m.sh` (SwiftBar interval is in the filename) |
+| Want a different refresh | Rename `AgentControl.1m.sh` (e.g. `.30s` / `.5m`); SwiftBar interval is in the filename |
 
 ## Uninstall
 
